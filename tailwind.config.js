@@ -13,6 +13,7 @@ export default {
         sidebar: {
           '20': 'rgba(2, 159, 230, 0.2)',
           '30': 'rgba(2, 159, 230, 0.3)',
+          '10': 'rgba(2, 159, 230, 0.1)',
           DEFAULT: '#029FE6'
         },
         secondary: '#183867',
