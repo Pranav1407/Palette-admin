@@ -35,11 +35,11 @@ const HoardingStatus = () => {
     const navigate = useNavigate()
 
     // Sample data - replace with your actual data
-    const hoardings = mockHoardings
+    let hoardings = mockHoardings
 
     // Filtering logic
-    const filteredHoardings = hoardings.filter(hoarding =>
-        hoarding.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredHoardings = hoardings.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
     // Sorting logic
