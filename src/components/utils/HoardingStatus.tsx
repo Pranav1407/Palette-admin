@@ -6,87 +6,120 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { SetStateAction, useState } from "react"
-import { mockHoardings } from "@/data/mockHoardings"
 import { RiAttachment2 } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
-// interface Hoarding {
-//     id: string
-//     image: string
-//     name: string
-//     time: Date
-//     attachments: number
-//     status: 'pending' | 'approved' | 'rejected'
-// }
+  import { useHoardings } from '@/providers/HoardingProvider'
 
-const HoardingStatus = () => {
-    const [searchQuery, setSearchQuery] = useState("")
+
+interface HoardingStatusProps {
+    searchQuery: string;
+    status: 'pending' | 'approved' | 'rejected' | '';
+    sort?: 'asc' | 'desc';
+    fromDate?: Date;
+    toDate?: Date;
+}  
+  const HoardingStatus = ({ searchQuery, status, sort, fromDate, toDate }: HoardingStatusProps) => {
+
+    const { hoardings } = useHoardings()
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 5
     const navigate = useNavigate()
 
-    // Sample data - replace with your actual data
-    let hoardings = mockHoardings
-
-    // Filtering logic
-    const filteredHoardings = hoardings.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-
-    // Sorting logic
-    const sortByTime = (order: 'asc' | 'desc') => {
-        const sorted = [...filteredHoardings].sort((a, b) => {
-            return order === 'asc' 
-                ? a.time.getTime() - b.time.getTime()
-                : b.time.getTime() - a.time.getTime()
-        })
-        return sorted
-    }
-
+    const filteredAndSortedHoardings = hoardings
+    .filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = status ? item.status === status : true;
+      
+      // Create new Date objects for start and end of the selected days
+      const itemDate = new Date(item.time);
+      const startDate = fromDate ? new Date(fromDate) : null;
+      const endDate = toDate ? new Date(toDate) : null;
+      
+      // Set start date to beginning of day (00:00:00)
+      if (startDate) {
+        startDate.setHours(0, 0, 0, 0);
+      }
+      
+      // Set end date to end of day (23:59:59.999)
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+      }
+      
+      const isAfterFromDate = startDate ? itemDate >= startDate : true;
+      const isBeforeToDate = endDate ? itemDate <= endDate : true;
+      
+      return matchesSearch && matchesStatus && isAfterFromDate && isBeforeToDate;
+    })
+    .sort((a, b) => {
+      if (sort === 'asc') {
+        return a.time.getTime() - b.time.getTime();
+      }
+      return b.time.getTime() - a.time.getTime();
+    });
+  
+  
     // Pagination logic
-    const totalPages = Math.ceil(filteredHoardings.length / itemsPerPage)
-    const paginatedHoardings = filteredHoardings.slice(
+    const totalPages = Math.ceil(filteredAndSortedHoardings.length / itemsPerPage)
+    const paginatedHoardings = filteredAndSortedHoardings.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     )
 
+    const renderPaginationItems = () => {
+        const items = [];
+        const showEllipsisStart = currentPage > 3;
+        const showEllipsisEnd = currentPage < totalPages - 2;
+    
+        for (let i = 1; i <= totalPages; i++) {
+          if (
+            i === 1 || // First page
+            i === totalPages || // Last page
+            (i >= currentPage - 1 && i <= currentPage + 1) // Pages around current
+          ) {
+            items.push(
+              <PaginationItem key={i}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(i)}
+                  isActive={currentPage === i}
+                >
+                  {i}
+                </PaginationLink>
+              </PaginationItem>
+            );
+          } else if (i === 2 && showEllipsisStart) {
+            items.push(
+              <PaginationItem key="ellipsis-start">
+                <PaginationEllipsis />
+              </PaginationItem>
+            );
+          } else if (i === totalPages - 1 && showEllipsisEnd) {
+            items.push(
+              <PaginationItem key="ellipsis-end">
+                <PaginationEllipsis />
+              </PaginationItem>
+            );
+          }
+        }
+        return items;
+      };
+  
     const handleHoardingClick = (id: string) => {
-        navigate(`/hoarding/${id}`)
-    }
-
+      navigate(`/hoarding/${id}`)
+    }   
+    
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <Input
-                    placeholder="Search hoarding..."
-                    value={searchQuery}
-                    onChange={(e: { target: { value: SetStateAction<string> } }) => setSearchQuery(e.target.value)}
-                    className="max-w-sm"
-                />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="default">Sort by Time</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => sortByTime('asc')}>
-                            Oldest first
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => sortByTime('desc')}>
-                            Newest first
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -117,25 +150,27 @@ const HoardingStatus = () => {
                 </TableBody>
             </Table>
 
-            <div className="flex justify-center gap-2">
-                <Button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </Button>
-                <span className="py-2">
-                    Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </Button>
-            </div>
+            <Pagination>
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                    </PaginationItem>
+                    
+                    {renderPaginationItems()}
+
+                    <PaginationItem>
+                        <PaginationNext 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                    </PaginationItem>
+                </PaginationContent>
+            </Pagination>
         </div>
     )
 }
 
-export default HoardingStatus
+export default HoardingStatus;

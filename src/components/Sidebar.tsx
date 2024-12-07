@@ -17,7 +17,13 @@ const Sidebar = () => {
                             <span>All hoardings</span>
                         </NavLink>
                         
-                        <NavLink to="/pending" className={({ isActive }) => `flex items-center gap-3 py-3 px-10 cursor-pointer hover:bg-white/30 hover:border-l-8 hover:border-secondary ${isActive ? 'bg-white/30 border-l-8 border-secondary' : ''}`}>
+                        <NavLink
+                            to="/pending" 
+                            className={({ isActive }) => {
+                                const isPendingActive = isActive || window.location.pathname.startsWith('/hoarding/');
+                                return `flex items-center gap-3 py-3 px-10 cursor-pointer hover:bg-white/30 hover:border-l-8 hover:border-secondary ${isPendingActive ? 'bg-white/30 border-l-8 border-secondary' : ''}`;
+                            }}
+                        >
                             <MdOutlineAccessTime size={25} />
                             <span>Pending</span>
                         </NavLink>
