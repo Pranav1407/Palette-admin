@@ -101,7 +101,7 @@ export interface LoginResponse {
       is_admin: boolean | null;
       is_labour: boolean | null;
     }
-  }
+}
   
   
 export interface LoginCredentials {

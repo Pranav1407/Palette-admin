@@ -17,7 +17,6 @@ const HoardingDetail = () => {
     const [showGeoMapModal, setShowGeoMapModal] = useState(false)
     const [isRejecting, setIsRejecting] = useState(false)
     const [rejectionReason, setRejectionReason] = useState("")
-    const [isRejected, setIsRejected] = useState(false)
     const [showRejectionReason, setShowRejectionReason] = useState(false)
     const { userId } = useAuthStore()
     const navigate = useNavigate();
@@ -162,7 +161,7 @@ const HoardingDetail = () => {
             />
 
             <div className="flex h-40 flex-col items-center justify-center gap-4 mt-8">
-                {requestData.current_status === "pending" && !isRejecting &&(
+                {requestData.current_status === "pending" && (
                     <div className="flex gap-4">
                         <Button 
                             variant="default" 
@@ -213,7 +212,6 @@ const HoardingDetail = () => {
                                 className="bg-red-600 hover:bg-red-700"
                                 onClick={() => {
                                     if (rejectionReason.trim()) {
-                                        setIsRejected(true)
                                         setIsRejecting(false)
                                         setShowRejectionReason(true)
                                         handleAction("rejected", rejectionReason)
