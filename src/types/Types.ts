@@ -119,3 +119,28 @@ export interface RequestActionParams {
 export interface RequestActionResponse {
     message: string;
 }
+
+export interface SubmitQueryResponse {
+    message: string;
+    response: {
+        district: string[];
+        location_route: string[];
+        direction_route: string[];
+        width: number[];
+        height: number[];
+        area: number[];
+        type: string[];
+        rate_sqft_1_months: number[];
+        rate_sqft_3_months: number[];
+        rate_sqft_6_months: number[];
+        rate_sqft_12_months: number[];
+        floor: string[];
+        hoarding_id: number[];
+        hoarding_code: string[];
+        status: string[];
+        location: string[];
+        available: boolean[];
+        lat: number[];
+        long: number[];
+    };
+}

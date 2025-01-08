@@ -1,4 +1,4 @@
-import { HoardingStats, FetchHoardingRequest, FetchHoardings, LoginCredentials, LoginResponse, RequestActionParams, RequestActionResponse } from '@/types/Types';
+import { HoardingStats, FetchHoardingRequest, FetchHoardings, LoginCredentials, LoginResponse, RequestActionParams, RequestActionResponse, SubmitQueryResponse } from '@/types/Types';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -50,6 +50,18 @@ export const requestAction = async (actionParams: RequestActionParams): Promise<
         return response.data;
     } catch (error) {
         console.error('Error requesting action:', error);
+        throw error;
+    }
+};
+
+export const submitQuery = async (query: string): Promise<SubmitQueryResponse> => {
+    const data = new URLSearchParams();
+    data.append('question', query);
+    try {
+        const response = await axios.post(`${API_URL}/submit`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error submitting query:', error);
         throw error;
     }
 };

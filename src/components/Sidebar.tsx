@@ -4,7 +4,7 @@ import { MdDashboard, MdErrorOutline, MdOutlineCheckCircleOutline, MdEmail, MdPe
 const Sidebar = () => {
     return (
         <div className="flex p-4">
-            <aside className="w-64 bg-sidebar-30 text-secondary font-normal rounded-lg">
+            <aside className="w-64 bg-sidebar-15 text-secondary font-normal rounded-lg">
                 <nav className="py-4">
                     <ul className="space-y-2 text-md">
                         <NavLink to="/" className={({ isActive }) => `flex items-center gap-3 py-3 px-10 cursor-pointer hover:bg-white/30 hover:border-l-8 hover:border-secondary ${isActive ? 'bg-white/30 border-l-8 border-secondary' : ''}`}>
