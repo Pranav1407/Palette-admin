@@ -6,10 +6,11 @@ import { Toaster } from "react-hot-toast"
 const Layout = () => {
   return (
     <div className="h-screen flex flex-col">
-      <Header />
+      {/* <Header /> */}
       <div className="flex h-full">
         <Sidebar />
         <main className="py-4 pr-4 h-full w-full">
+          <Header />
           <Outlet />
           <Toaster />
         </main>

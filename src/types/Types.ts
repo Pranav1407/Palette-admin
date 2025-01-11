@@ -144,3 +144,34 @@ export interface SubmitQueryResponse {
         long: number[];
     };
 }
+
+export interface BotResponseProps {
+    content: {
+        district: string[];
+        location_route: string[];
+        direction_route: string[];
+        width: number[];
+        height: number[];
+        area: number[];
+        type: string[];
+        rate_sqft_1_months: number[];
+        rate_sqft_3_months: number[];
+        rate_sqft_6_months: number[];
+        rate_sqft_12_months: number[];
+        floor: string[];
+        hoarding_id: number[];
+        hoarding_code: string[];
+        status: string[];
+        location: string[];
+        available: boolean[];
+        lat: number[];
+        long: number[];
+    } | string;
+}
+
+export interface DownloadOption {
+    id: string;
+    label: string;
+    selected: boolean;
+    icon: React.ReactNode;
+}

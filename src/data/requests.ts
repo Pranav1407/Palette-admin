@@ -65,3 +65,15 @@ export const submitQuery = async (query: string): Promise<SubmitQueryResponse> =
         throw error;
     }
 };
+
+export const downloadFile = async (downloadData: any): Promise<Blob> => {
+    try {
+        const response = await axios.post(`${API_URL}/download`, downloadData, {
+            responseType: 'blob',
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        throw error;
+    }
+};

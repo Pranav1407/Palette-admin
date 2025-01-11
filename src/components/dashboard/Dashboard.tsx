@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { History, SendHorizontal } from 'lucide-react';
+import { SendHorizontal, Hourglass } from 'lucide-react';
 import BotResponse from './BotResponse';
 import { useMutation } from '@tanstack/react-query';
 import { submitQuery } from '@/data/requests';
@@ -95,13 +95,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="h-[80vh] w-full flex flex-col">
+    <div className="h-[85vh] w-full flex flex-col">
       {isInitial ? (
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-left mb-8 w-[67%]">
-            <div className="mb-6 text-5xl">
+            <div className="mb-6 text-5xl gradient-text">
               <h1 className="font-semibold">Hi there,</h1>
-              <p className="mt-2">What would you like to know?</p>
+              <p className="mt-2 font-semibold">What would you like to know?</p>
             </div>
           </div>
           
@@ -111,41 +111,45 @@ const Dashboard = () => {
                 name="query"
                 type="text"
                 placeholder="Ask me anything..."
-                className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
               />
-              <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-4 py-3 rounded-tr-xl rounded-br-xl">
+              <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
                 <SendHorizontal className="w-5 h-5" />
               </button>
             </form>
             
             <div className="flex gap-2 mt-4 justify-center">
-              <button className="flex items-center px-4 py-1 rounded-full border hover:bg-gray-50">
-                <History className="w-5 h-5" />
-                <span className="ml-2">Chat History</span>
+              <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                How many hoardings are free now?
               </button>
-              <button className="px-4 py-1 rounded-full border hover:bg-gray-50">
-                How can I create a new palette?
-              </button>
-              <button className="px-4 py-1 rounded-full border hover:bg-gray-50">
-                What are the trending color combinations?
+              <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                What hoardings need to be changed?
               </button>
             </div>
           </div>
         </div>
       ) : (
         <>
-          <div className="flex-1 max-w-[90%] mx-auto w-full overflow-y-auto scrollbar-hide">
+          <div className="flex-1 w-full max-w-screen-lg mx-auto overflow-y-auto scrollbar-hide">
             {messages.map((message, index) => (
-              <div key={index} className={`max-w-fit mb-4 ${message.type === 'user' ? 'ml-auto' : 'mr-auto'}`}>
+              <div key={index} className={`max-w-fit ${message.type === 'user' ? 'ml-auto' : 'mr-auto mb-12'}`}>
                 {message.type === 'user' ? (
-                  //@ts-ignore
-                  <p className="p-3 rounded-lg border">{message.content}</p>
+                  // @ts-ignore
+                  <p className="p-3 gradient-text text-2xl font-medium">{message.content}</p>
                 ) : (
                   <BotResponse content={message.content} />
                 )}
                 <div ref={messagesEndRef}></div>
               </div>
             ))}
+            {chatMutation.isPending && (
+              <div className="max-w-fit mb-4 mr-auto">
+                <div className="p-3 rounded-lg flex items-center gap-2 text-[#818181]">
+                  <Hourglass className="w-4 h-4 animate-spin" />
+                  <span>Handling request...</span>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="p-4 flex justify-center">
@@ -155,23 +159,19 @@ const Dashboard = () => {
                   name="query"
                   type="text"
                   placeholder="Ask me anything..."
-                  className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
                 />
-                <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-4 py-3 rounded-tr-xl rounded-br-xl">
+                <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
                   <SendHorizontal className="w-5 h-5" />
                 </button>
               </form>
 
               <div className="flex gap-2 mt-4 justify-center">
-                <button className="flex items-center px-4 py-1 rounded-full border hover:bg-gray-50">
-                  <History className="w-5 h-5" />
-                  <span className="ml-2">Chat History</span>
+                <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                  How many hoardings are free now?
                 </button>
-                <button className="px-4 py-1 rounded-full border hover:bg-gray-50">
-                  How can I create a new palette?
-                </button>
-                <button className="px-4 py-1 rounded-full border hover:bg-gray-50">
-                  What are the trending color combinations?
+                <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                  What hoardings need to be changed?
                 </button>
               </div>
             </div>

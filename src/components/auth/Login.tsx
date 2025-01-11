@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query"
 import { loginUser } from "@/data/requests"
 import { useAuthStore } from "../../stores/authStore"
 import { useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
+import { Eye, EyeOff } from "lucide-react"
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -12,6 +14,8 @@ export function LoginPage() {
     username: "",
     password: ""
   })
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('');
 
   const loginMutation = useMutation({
     mutationFn: loginUser,
@@ -20,11 +24,13 @@ export function LoginPage() {
             setAuth(data.payload.user_id, true)
             navigate('/')
         } else {
-            alert("Only admin users are allowed to access this portal")
+            toast.error('You are not authorized to access this page.')
         }
     },
     onError: (error) => {
       console.error('Login failed:', error)
+      //@ts-expect-error error.response is not null
+      setError(error.response.data.detail)
     }
   })
 
@@ -34,61 +40,46 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-        <div className="flex justify-center">
-          <img
-            className="h-12 w-auto"
-            src="/assets/logo.svg"
-            alt="Your Company"
+    <div className="h-screen flex">
+      <div className="w-1/2 m-2 bg-sidebar-30 flex items-center justify-center rounded-[5px]">
+        <img src="/assets/Logo.png" alt="Logo" />
+      </div>
+      <div className="w-1/2 flex flex-col gap-5 items-center justify-center">
+        <p className="font-thin text-5xl">Login</p>
+        <form className="flex flex-col" onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            className={`w-[592px] m-2 p-3 pl-6 border border-[#d9d9d9] rounded-[20px] outline-none font-normal text-xl text-[#818181] ${error ? 'border-red-500' : ''}`}
+            value={credentials.username}
+            required
+            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
           />
-        </div>
-        
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-secondary">
-          Sign in to your account
-        </h2>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-sidebar focus:border-sidebar focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={credentials.username}
-                onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-sidebar focus:border-sidebar focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={credentials.password}
-                onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-              />
-            </div>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className={`w-[592px] m-2 p-3 pl-6 border border-[#d9d9d9] rounded-[20px] outline-none font-normal text-xl text-[#818181] ${error ? 'border-red-500' : ''}`}
+              value={credentials.password}
+              required
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
-
+          <span className="text-lg m-2 ml-4 text-sidebar">Forgot password ?</span>
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <Button
+            variant='default'
             type="submit"
-            variant={'default'}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sidebar hover:bg-sidebar-70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            disabled={loginMutation.isPending}
+            className={`w-[592px] m-2 mt-4 p-8 bg-sidebar text-white rounded-[20px] font-semibold text-xl cursor-pointer ${loginMutation.isPending && 'cursor-progress opacity-40'}`}
           >
-            {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
+            {loginMutation.isPending ? 'Loging in...' : 'Login'}
           </Button>
         </form>
       </div>

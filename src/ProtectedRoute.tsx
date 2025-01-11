@@ -1,12 +1,16 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 
-export function ProtectedRoute() {
-  const { userId, isAdmin } = useAuthStore();
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const userId = useAuthStore((state) => state.userId);
 
-  if (!userId || !isAdmin) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    if (!userId) {
+      navigate('/login');
+    }
+  }, [userId, navigate]);
 
-  return <Outlet />;
+  return userId ? <>{children}</> : null;
 }

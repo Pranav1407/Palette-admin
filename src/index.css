@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @layer base {
   :root {
     --radius: 0.5rem
+  }
+  html {
+    font-family: 'Roboto', sans-serif;
   }
 }
 
@@ -14,4 +19,11 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #000000, #183867, #029FE6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
