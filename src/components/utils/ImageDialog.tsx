@@ -5,7 +5,7 @@ import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-i
 interface ImageDialogProps {
     isOpen: boolean
     onClose: () => void
-    images: string[]
+    images: (string | undefined)[]
     currentIndex: number
     onNext: () => void
     onPrevious: () => void

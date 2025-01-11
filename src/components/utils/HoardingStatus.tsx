@@ -17,29 +17,33 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination"  
+import { useQuery } from "@tanstack/react-query";
+import { fetchHoardings } from "@/data/requests";
 
-  import { useHoardings } from '@/providers/HoardingProvider'
+type HoardingStatusProps = {
+  status: string;
+  searchQuery: string;
+  sort?: string;
+  fromDate?: Date;
+  toDate?: Date;
+}
 
+  const HoardingStatus = ({status, sort, searchQuery, fromDate, toDate}: HoardingStatusProps) => { //{ searchQuery, status, sort, fromDate, toDate }: HoardingStatusProps
 
-interface HoardingStatusProps {
-    searchQuery: string;
-    status: 'pending' | 'approved' | 'rejected' | '';
-    sort?: 'asc' | 'desc';
-    fromDate?: Date;
-    toDate?: Date;
-}  
-  const HoardingStatus = ({ searchQuery, status, sort, fromDate, toDate }: HoardingStatusProps) => {
-
-    const { hoardings } = useHoardings()
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 5
     const navigate = useNavigate()
 
+    const {data, isError, error} = useQuery({
+      queryKey: ["hoardings"],
+      queryFn: () => fetchHoardings(status)
+    })
+
+    const hoardings = data ? data.payload.data : []
     const filteredAndSortedHoardings = hoardings
-    .filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = status ? item.status === status : true;
+    .filter((item: any) => {
+      const matchesSearch = item.current_status.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Create new Date objects for start and end of the selected days
       const itemDate = new Date(item.time);
@@ -59,22 +63,26 @@ interface HoardingStatusProps {
       const isAfterFromDate = startDate ? itemDate >= startDate : true;
       const isBeforeToDate = endDate ? itemDate <= endDate : true;
       
-      return matchesSearch && matchesStatus && isAfterFromDate && isBeforeToDate;
+      return matchesSearch && isAfterFromDate && isBeforeToDate;
     })
+
     .sort((a, b) => {
+      const dateA = new Date(a.updated_at);
+      const dateB = new Date(b.updated_at);
+      
       if (sort === 'asc') {
-        return a.time.getTime() - b.time.getTime();
+        return dateA.getTime() - dateB.getTime();
       }
-      return b.time.getTime() - a.time.getTime();
+      return dateB.getTime() - dateA.getTime();
     });
-  
-  
+
     // Pagination logic
-    const totalPages = Math.ceil(filteredAndSortedHoardings.length / itemsPerPage)
-    const paginatedHoardings = filteredAndSortedHoardings.slice(
+    
+    const totalPages = filteredAndSortedHoardings ? Math.ceil(filteredAndSortedHoardings.length / itemsPerPage) : 0
+    const paginatedHoardings = filteredAndSortedHoardings ? filteredAndSortedHoardings.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
-    )
+    ) : []
 
     const renderPaginationItems = () => {
         const items = [];
@@ -114,10 +122,14 @@ interface HoardingStatusProps {
         return items;
       };
   
-    const handleHoardingClick = (id: string) => {
+    const handleHoardingClick = (id: number) => {
       navigate(`/hoarding/${id}`)
-    }   
-    
+    }
+
+    if (isError) {
+      return <div>Error: {error instanceof Error ? error.message : 'An error occurred'}</div>
+    }
+
     return (
         <div className="space-y-4">
             <Table>
@@ -130,20 +142,20 @@ interface HoardingStatusProps {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedHoardings.map((hoarding) => (
-                        <TableRow key={hoarding.id} onClick={() => handleHoardingClick(hoarding.id)}>
+                    {paginatedHoardings.map((hoarding: any) => (
+                        <TableRow key={hoarding.request_id} onClick={() => handleHoardingClick(hoarding.request_id)}>
                             <TableCell>
                                 <img 
-                                    src={hoarding.image} 
-                                    alt={hoarding.name}
+                                    src="/assets/hoarding.svg"
+                                    alt={"hoarding image"}
                                     className="w-16 h-16 object-cover rounded"
                                 />
                             </TableCell>
-                            <TableCell>{hoarding.name}</TableCell>
-                            <TableCell>{hoarding.time.toLocaleString()}</TableCell>
+                            <TableCell>Highway Billboard A1</TableCell>
+                            <TableCell>{new Date(hoarding.created_at).toLocaleString()}</TableCell>
                             <TableCell>
                                 <RiAttachment2 className="inline-block mr-1 size-5" />
-                                {hoarding.attachments}
+                                1 geo map, 4 images, 1 video
                             </TableCell>
                         </TableRow>
                     ))}

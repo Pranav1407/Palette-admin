@@ -15,8 +15,8 @@ const AllHoardings = () => {
           className="max-w-sm"
         />
       </div>
-      <HoardingStatus 
-        searchQuery={searchQuery} 
+      <HoardingStatus
+        searchQuery={searchQuery}
         status=""
       />
     </div>
