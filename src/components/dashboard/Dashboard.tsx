@@ -94,6 +94,12 @@ const Dashboard = () => {
     }
   };
 
+  const handleQueryClick = (query: string) => {
+    setIsInitial(false);
+    setMessages(prev => [...prev, { type: 'user', content: query }]);
+    chatMutation.mutate(query);
+  };
+
   return (
     <div className="h-[85vh] w-full flex flex-col">
       {isInitial ? (
@@ -119,10 +125,16 @@ const Dashboard = () => {
             </form>
             
             <div className="flex gap-2 mt-4 justify-center">
-              <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+              <button 
+                className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
+                onClick={() => handleQueryClick("How many hoardings are free now?")}
+              >
                 How many hoardings are free now?
               </button>
-              <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+              <button 
+                className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
+                onClick={() => handleQueryClick("What hoardings need to be changed?")}
+              >
                 What hoardings need to be changed?
               </button>
             </div>
@@ -167,10 +179,16 @@ const Dashboard = () => {
               </form>
 
               <div className="flex gap-2 mt-4 justify-center">
-                <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                <button 
+                  className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar" 
+                  onClick={() => handleQueryClick("How many hoardings are free now?")}
+                >
                   How many hoardings are free now?
                 </button>
-                <button className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar">
+                <button 
+                  className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
+                  onClick={() => handleQueryClick("What hoardings need to be changed?")}
+                >
                   What hoardings need to be changed?
                 </button>
               </div>
