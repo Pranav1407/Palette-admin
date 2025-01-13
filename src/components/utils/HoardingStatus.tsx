@@ -1,11 +1,3 @@
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
 import { RiAttachment2 } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -29,7 +21,7 @@ type HoardingStatusProps = {
   toDate?: Date;
 }
 
-  const HoardingStatus = ({status, sort, searchQuery, fromDate, toDate}: HoardingStatusProps) => { //{ searchQuery, status, sort, fromDate, toDate }: HoardingStatusProps
+  const HoardingStatus = ({status, sort, searchQuery, fromDate, toDate}: HoardingStatusProps) => {
 
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 5
@@ -130,58 +122,70 @@ type HoardingStatusProps = {
       return <div>Error: {error instanceof Error ? error.message : 'An error occurred'}</div>
     }
 
+    const formatDate = (date: string) => {
+      const d = new Date(date);
+      const day = d.getDate();
+      const suffix = (day > 3 && day < 21) || day % 10 > 3 ? 'th' : ['st', 'nd', 'rd'][day % 10 - 1];
+      return d.toLocaleDateString('en-US', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+      }).replace(/(\d+)/, `$1${suffix}`);
+  }
+
     return (
-        <div className="space-y-4">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Time</TableHead>
-                        <TableHead>Attachments</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {paginatedHoardings.map((hoarding: any) => (
-                        <TableRow key={hoarding.request_id} onClick={() => handleHoardingClick(hoarding.request_id)}>
-                            <TableCell>
-                                <img 
-                                    src="/assets/hoarding.svg"
-                                    alt={"hoarding image"}
-                                    className="w-16 h-16 object-cover rounded"
-                                />
-                            </TableCell>
-                            <TableCell>Highway Billboard A1</TableCell>
-                            <TableCell>{new Date(hoarding.created_at).toLocaleString()}</TableCell>
-                            <TableCell>
-                                <RiAttachment2 className="inline-block mr-1 size-5" />
-                                1 geo map, 4 images, 1 video
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+      <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+              {paginatedHoardings.map((hoarding: any) => (
+                <div 
+                  key={hoarding.request_id} 
+                  onClick={() => handleHoardingClick(hoarding.request_id)}
+                  className="flex items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <img 
+                      src="/assets/hoarding.svg"
+                      alt="hoarding image"
+                      className="w-16 h-16 object-cover rounded mr-4"
+                  />
+                  <div className="flex-grow">
+                      <h3 className="font-medium">{hoarding.hoarding_details["Location/Route"]}</h3>
+                  </div>
+                  <div className="flex-grow flex items-center text-[#818181]">
+                      <RiAttachment2 className="inline-block mr-1 size-5" />
+                      <span>{`${hoarding.media_type_count.geo_image} geo map, ${hoarding.media_type_count.image} images, ${hoarding.media_type_count.video} video`}</span>
+                  </div>
+                  <div className="text-[#818181] flex-grow">
+                    {formatDate(hoarding.created_at) + ", " + new Date(hoarding.created_at).toLocaleTimeString()}
+                  </div>
+                  <div className={`rounded-[10px] p-2 w-fit ${status === "pending" ? "bg-sidebar-30 text-black" :  status === "approved" ? "bg-[#4BB543] text-white" : "bg-[#F55555] text-white"}`}>
+                    {status === "pending" ? "Approval pending" : status === "approved" ? "Approved" : "Rejected"}
+                  </div>
+                </div>
+              ))}
+          </div>
 
-            <Pagination>
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious 
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                    </PaginationItem>
-                    
-                    {renderPaginationItems()}
-
-                    <PaginationItem>
-                        <PaginationNext 
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
-        </div>
+          <div className="flex flex-col items-end mt-8">
+              <Pagination className="mb-4">
+                  <PaginationContent>
+                      <PaginationItem>
+                          <PaginationPrevious 
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                      </PaginationItem>
+                      {renderPaginationItems()}
+                      <PaginationItem>
+                          <PaginationNext 
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                      </PaginationItem>
+                  </PaginationContent>
+              </Pagination>
+              
+              <h2 className="text-5xl font-extralight text-[#d9d9d9]">Let's have fun working</h2>
+          </div>
+      </div>
     )
 }
 

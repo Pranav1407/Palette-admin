@@ -1,201 +1,122 @@
-import { useState, useRef, useEffect } from 'react';
-import { SendHorizontal, Hourglass } from 'lucide-react';
-import BotResponse from './BotResponse';
-import { useMutation } from '@tanstack/react-query';
-import { submitQuery } from '@/data/requests';
-
+import { fetchStats } from "@/data/requests";
+import { useQuery } from "@tanstack/react-query";
+import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
-  const [isInitial, setIsInitial] = useState(true);
-  const [messages, setMessages] = useState<{
-    type: 'user' | 'bot';
-    content: string | {
-      district: string[];
-      location_route: string[];
-      direction_route: string[];
-      width: number[];
-      height: number[];
-      area: number[];
-      type: string[];
-      rate_sqft_1_months: number[];
-      rate_sqft_3_months: number[];
-      rate_sqft_6_months: number[];
-      rate_sqft_12_months: number[];
-      floor: string[];
-      hoarding_id: number[];
-      hoarding_code: string[];
-      status: string[];
-      location: string[];
-      available: boolean[];
-      lat: number[];
-      long: number[];
-    };
-  }[]>([]);
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  
-  const chatMutation = useMutation({
-    mutationFn: async (query: string) => {
-      const response = await submitQuery(query);
-      return response;
-    },
-    onSuccess: (data) => {
-      setMessages(prev => [...prev, { 
-        type: 'bot', 
-        content: data.response
-      }]);
-    },
-    onError: () => {
-      setMessages(prev => [...prev, { 
-        type: 'bot', 
-        content: {
-          district: ['Error'],
-          location_route: ['Failed to get response. Please try again.'],
-          direction_route: [],
-          width: [],
-          height: [],
-          area: [],
-          type: [],
-          rate_sqft_1_months: [],
-          rate_sqft_3_months: [],
-          rate_sqft_6_months: [],
-          rate_sqft_12_months: [],
-          floor: [],
-          hoarding_id: [],
-          hoarding_code: [],
-          status: [],
-          location: [],
-          available: [],
-          lat: [],
-          long: []
-        }
-      }]);
-    }
+  const { data: data } = useQuery({
+    queryKey: ["stats"],
+    queryFn: fetchStats,
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const input = e.currentTarget.elements.namedItem('query') as HTMLInputElement;
-    const query = input.value;
-    
-    if (query.trim()) {
-      setIsInitial(false);
-      setMessages(prev => [...prev, { type: 'user', content: query }]);
-      chatMutation.mutate(query);
-      input.value = '';
-    }
-  };
-
-  const handleQueryClick = (query: string) => {
-    setIsInitial(false);
-    setMessages(prev => [...prev, { type: 'user', content: query }]);
-    chatMutation.mutate(query);
+  const dashboardStats = {
+    availableHoardings: 24,
+    bookedHoardings: 12,
+    pendingHoardings: data?.payload.pending_hoardings,
+    approvedHoardings: data?.payload.approved_hoardings,
+    rejectedHoardings: data?.payload.rejected_hoardings,
+    totalHoardings: data?.payload.total_hoardings,
   };
 
   return (
-    <div className="h-[85vh] w-full flex flex-col">
-      {isInitial ? (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="text-left mb-8 w-[67%]">
-            <div className="mb-6 text-5xl gradient-text">
-              <h1 className="font-semibold">Hi there,</h1>
-              <p className="mt-2 font-semibold">What would you like to know?</p>
+    <div className="bg-gray-50 p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-secondary">Dashboard Overview</h1>
+        <p className="text-secondary">Welcome to your hoarding management dashboard</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        {/* Pending Hoardings */}
+        <NavLink to={'/pending'} className="bg-white p-8 rounded-xl shadow-md border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-orange-100 mr-6">
+              <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Pending Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.pendingHoardings}</p>
             </div>
           </div>
-          
-          <div className="w-full max-w-[70%] px-4">
-            <form onSubmit={handleSubmit} className="relative">
-              <input
-                name="query"
-                type="text"
-                placeholder="Ask me anything..."
-                className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
-              />
-              <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
-                <SendHorizontal className="w-5 h-5" />
-              </button>
-            </form>
-            
-            <div className="flex gap-2 mt-4 justify-center">
-              <button 
-                className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                onClick={() => handleQueryClick("How many hoardings are free now?")}
-              >
-                How many hoardings are free now?
-              </button>
-              <button 
-                className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                onClick={() => handleQueryClick("What hoardings need to be changed?")}
-              >
-                What hoardings need to be changed?
-              </button>
+        </NavLink>
+
+        {/* Total Hoardings */}
+        <div className="bg-white p-8 rounded-xl shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-blue-100 mr-6">
+              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Total Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.totalHoardings}</p>
             </div>
           </div>
         </div>
-      ) : (
-        <>
-          <div className="flex-1 w-full max-w-screen-lg mx-auto overflow-y-auto scrollbar-hide">
-            {messages.map((message, index) => (
-              <div key={index} className={`max-w-fit ${message.type === 'user' ? 'ml-auto' : 'mr-auto mb-12'}`}>
-                {message.type === 'user' ? (
-                  // @ts-ignore
-                  <p className="p-3 gradient-text text-2xl font-medium">{message.content}</p>
-                ) : (
-                  <BotResponse content={message.content} />
-                )}
-                <div ref={messagesEndRef}></div>
-              </div>
-            ))}
-            {chatMutation.isPending && (
-              <div className="max-w-fit mb-4 mr-auto">
-                <div className="p-3 rounded-lg flex items-center gap-2 text-[#818181]">
-                  <Hourglass className="w-4 h-4 animate-spin" />
-                  <span>Handling request...</span>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="p-4 flex justify-center">
-            <div className="w-full max-w-[70%]">
-              <form onSubmit={handleSubmit} className="relative">
-                <input
-                  name="query"
-                  type="text"
-                  placeholder="Ask me anything..."
-                  className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
-                />
-                <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
-                  <SendHorizontal className="w-5 h-5" />
-                </button>
-              </form>
 
-              <div className="flex gap-2 mt-4 justify-center">
-                <button 
-                  className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar" 
-                  onClick={() => handleQueryClick("How many hoardings are free now?")}
-                >
-                  How many hoardings are free now?
-                </button>
-                <button 
-                  className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                  onClick={() => handleQueryClick("What hoardings need to be changed?")}
-                >
-                  What hoardings need to be changed?
-                </button>
-              </div>
+        {/* Approved Hoardings */}
+        <NavLink to={'/approved'} className="bg-white p-8 rounded-xl shadow-md border-l-4 border-green-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-green-100 mr-6">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Approved Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.approvedHoardings}</p>
             </div>
           </div>
-        </>
-      )}
+        </NavLink>
+
+        {/* Available Hoardings */}
+        <div className="bg-white p-8 rounded-xl shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-yellow-100 mr-6">
+              <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Available Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.availableHoardings}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Rejected Hoardings */}
+        <NavLink to={'/rejected'} className="bg-white p-8 rounded-xl shadow-md border-l-4 border-red-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-red-100 mr-6">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Rejected Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.rejectedHoardings}</p>
+            </div>
+          </div>
+        </NavLink>
+
+        {/* Booked Hoardings */}
+        <div className="bg-white p-8 rounded-xl shadow-md border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center">
+            <div className="p-4 rounded-full bg-purple-100 mr-6">
+              <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-lg">Booked Hoardings</p>
+              <p className="text-4xl font-bold text-secondary">{dashboardStats.bookedHoardings}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
