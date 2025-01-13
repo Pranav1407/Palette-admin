@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { MdErrorOutline, MdOutlineCheckCircleOutline, MdEmail, MdPersonAdd, MdOutlineAccessTime, MdKeyboardArrowDown } from 'react-icons/md'
 import { RxDashboard } from 'react-icons/rx'
-import { PanelRightClose } from 'lucide-react'
+import { MessageSquare, PanelRightClose } from 'lucide-react'
 import { useState } from 'react'
 
 const Sidebar = () => {
@@ -10,7 +10,7 @@ const Sidebar = () => {
 
     return (
         <div className="flex p-4">
-            <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-60'} transition-all duration-300 bg-sidebar-15 text-sidebar font-normal rounded-[20px] px-4`}>
+            <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-60'} transition-all duration-300 bg-sidebar-15 text-sidebar shadow-md shadow-sidebar-15 font-normal rounded-[20px] px-4`}>
                 <div className="flex items-center justify-center py-4 cursor-pointer" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
                     {isSidebarCollapsed ? (
                         <PanelRightClose size={24} />
@@ -27,6 +27,14 @@ const Sidebar = () => {
                         >
                             <RxDashboard size={25} />
                             {!isSidebarCollapsed && <span>Dashboard</span>}
+                        </NavLink>
+                        <NavLink to="/chat"  className={({ isActive }) => 
+                            `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
+                                isActive ? 'bg-white text-secondary rounded-lg' : ''
+                            }`}
+                        >
+                            <MessageSquare size={25} />
+                            {!isSidebarCollapsed && <span>Chat</span>}
                         </NavLink>
                         <div className="relative">
                             <div 
