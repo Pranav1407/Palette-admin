@@ -3,7 +3,12 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 
-const Header = () => {
+interface HeaderProps {
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+}
+
+const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
     const [showPopover, setShowPopover] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,11 +48,17 @@ const Header = () => {
         <header className="bg-white px-8 py-4 flex justify-between items-center relative">
             <div className="text-5xl text-sidebar-15 w-[90%] flex justify-between items-center">
                 {getPageTitle()}
-                {location.pathname !== '/chat' && (
+                {location.pathname !== '/chat' && location.pathname !== '/' && (
                     <div className="flex items-center justify-center gap-2">
                         <div className="rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal p-3 flex items-center justify-center gap-2">
                             <Search size={26} />
-                            <input type="text" placeholder="Search..." className="outline-none border-none pl-1 min-w-80" />
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                className="outline-none border-none pl-1 min-w-80" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
                         </div>
                         <div className="bg-sidebar rounded-[10px] flex items-center justify-center py-2 px-4 cursor-pointer">
                             <img src="/assets/icons/filter.svg" />

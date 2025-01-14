@@ -1,13 +1,13 @@
 import {useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ImageDialog } from "@/components/utils/ImageDialog"
 import { CheckCircle, AlertCircle, MoveLeft } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
 import { fetchRequest, requestAction } from "@/data/requests"
 import { HoardingData, RequestData } from "@/types/Types"
 import { useAuthStore } from "@/stores/authStore"
 import toast from "react-hot-toast"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 const HoardingDetail = () => {
@@ -20,10 +20,32 @@ const HoardingDetail = () => {
     const { userId } = useAuthStore()
     const navigate = useNavigate();
 
-    const {data, isLoading, isError, error } = useQuery({
-        queryKey:["request"],
-        queryFn: () => fetchRequest(id ? parseInt(id) : null)
-    })
+    const [data, setData] = useState<any>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isError, setIsError] = useState(false)
+    const [error, setError] = useState<Error | null>(null)
+    const [isRejectLoading, setIsRejectLoading] = useState(false)
+    const [geoMapLoading, setGeoMapLoading] = useState(true);
+    const [imagesLoading, setImagesLoading] = useState(true);
+    // const [videoLoading, setVideoLoading] = useState(true);
+    
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setIsLoading(true)
+                const response = await fetchRequest(id ? parseInt(id) : null)
+                setData(response)
+                setIsLoading(false)
+            } catch (err) {
+                setIsError(true)
+                setError(err as Error)
+                setIsLoading(false)
+            }
+        }
+        
+        loadData()
+    }, [id])
+    
 
     const hoardingData = data?.payload.hoarding_data ?? {} as HoardingData;
     const requestData = data?.payload.request_data ?? {} as RequestData;
@@ -36,10 +58,6 @@ const HoardingDetail = () => {
         if (item.media_type === "geo_image") {
             geomap.push(item.presigned_url);
         } else if (item.media_type === "image") {
-            images.push(item.presigned_url);
-            images.push(item.presigned_url);
-            images.push(item.presigned_url);
-            images.push(item.presigned_url);
             images.push(item.presigned_url);
         }
     });
@@ -61,10 +79,56 @@ const HoardingDetail = () => {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return (
+            <div className="space-y-4 p-2">
+                <div className="flex items-center gap-8 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="w-16 h-16 rounded" />
+                        <Skeleton className="h-6 w-[200px]" />
+                    </div>
+                    <Skeleton className="h-4 w-[150px]" />
+                </div>
+                
+                <div className="flex gap-8">
+                    <div className="w-1/2 space-y-8 border-r border-[#d9d9d9]">
+                        <div className="grid grid-cols-2 gap-4 space-y-2">
+                            <div className="w-[207px] h-[200px]">
+                                <Skeleton className="h-8 w-32 mb-3" />
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            </div>
+    
+                            <div className="w-[227px] h-[220px]">
+                                <Skeleton className="h-8 w-32 mb-3" />
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Skeleton className="w-full h-[100px] rounded-tl-lg" />
+                                    <Skeleton className="w-full h-[100px] rounded-tr-lg" />
+                                    <Skeleton className="w-full h-[100px] rounded-bl-lg" />
+                                    <Skeleton className="w-full h-[100px] rounded-br-lg" />
+                                </div>
+                            </div>
+    
+                            <div className="w-[207px] h-[200px]">
+                                <Skeleton className="h-8 w-32 mb-1" />
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div className="w-1/2 p-4">
+                        <div className="h-full flex flex-col items-center justify-center gap-4">
+                            <Skeleton className="h-12 w-[70%]" />
+                            <Skeleton className="h-8 w-[50%]" />
+                            <Skeleton className="h-10 w-[70%]" />
+                            <Skeleton className="h-10 w-[70%]" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     const handleAction = async (action: string, comment: string) => {
+        setIsRejectLoading(true);
         const actionParams = {
             action: action,
             request_id: Number(id),
@@ -73,10 +137,14 @@ const HoardingDetail = () => {
         }
         const response = await requestAction(actionParams);
         if(response.message === `Request updated successfully with ${action} action.`) {
-            toast("Request updated successfully", { icon: "🚀" })
+            setIsRejectLoading(false);
+            toast.success("Request updated successfully", { 
+                position: 'top-right',
+             })
             navigate(`/${action}`)
         }
         else {
+            setIsRejectLoading(false);
             console.error("Error updating request:", response.message)
         }
     }
@@ -113,31 +181,43 @@ const HoardingDetail = () => {
             </div>
             <div className="flex gap-8">
                 <div className="w-1/2 space-y-8 border-r border-[#d9d9d9]">
-                    <div className="grid grid-cols-2">
-                        <div>
+                    <div className="grid grid-cols-2 gap-4 space-y-2">
+                        <div className="w-[207px] h-[200px]">
                             <h2 className="text-xl font-semibold mb-3">Geo Map</h2>
+                            {geoMapLoading && <Skeleton className="w-full h-full rounded-lg" />}
                             <img 
                                 src={geomap[0]}
                                 alt="Geo Map"
-                                className="w-64 h-32 object-cover rounded-lg"
+                                className={`w-full h-full object-cover rounded-lg cursor-pointer ${geoMapLoading ? 'hidden' : ''}`}
                                 onClick={() => setShowGeoMapModal(true)}
+                                onLoad={() => setGeoMapLoading(false)}
                             />
                         </div>
 
-                        <div>
+                        <div className="w-[227px] h-[220px]">
                             <h2 className="text-xl font-semibold mb-3">Images</h2>
-                            <div className="max-h-32 w-32 h-32 grid grid-cols-2 gap-4" onClick={() => setShowImageModal(true)}>
+                            {imagesLoading && <Skeleton className="w-full h-full rounded-lg" />}
+                            <div className={`w-full h-full grid ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} ${imagesLoading ? 'hidden' : ''}`} onClick={() => setShowImageModal(true)}>
                                 {images.slice(0, 3).map((img, index) => (
-                                    <div key={index} className="aspect-square w-16 h-16">
+                                    <div key={index} className={`aspect-square w-full h-full cursor-pointer ${
+                                        index === 0 ? 'rounded-tl-lg' : 
+                                        index === 1 ? 'rounded-tr-lg' : 
+                                        index === 2 ? 'rounded-bl-lg' : ''
+                                    }`}>
                                         <img 
                                             src={img} 
                                             alt={`Image`}
-                                            className="w-16 h-16 object-cover rounded-lg"
+                                            className={`w-full h-full object-cover ${
+                                                index === 0 ? 'rounded-tl-lg' : 
+                                                index === 1 ? 'rounded-tr-lg' : 
+                                                index === 2 ? 'rounded-bl-lg' : ''
+                                            }`}
+                                            onLoad={() => setImagesLoading(false)}
                                         />
                                     </div>
                                 ))}
                                 {images.length > 3 && (
-                                    <div className="w-16 h-16 aspect-square bg-black/80 rounded-lg flex items-center justify-center">
+                                    <div className="w-full h-full aspect-square bg-black/80 flex items-center justify-center rounded-br-lg">
                                         <span className="text-white text-xl font-bold">
                                             +{images.length - 3}
                                         </span>
@@ -145,17 +225,19 @@ const HoardingDetail = () => {
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <h2 className="text-xl font-semibold mb-3">Video</h2>
-                        <video 
-                            className="w-52 h-52 rounded-lg object-cover"
-                            controls
-                        >
-                            <source src="" type="video/mp4" />
-                            Your browser does not support the video tag.
-                        </video>
+                        <div className="w-[207px] h-[200px]">
+                            <h2 className="text-xl font-semibold mb-1">Video</h2>
+                            {/* {videoLoading && <Skeleton className="w-full h-full rounded-lg" />} */}
+                            <video 
+                                className={`w-full h-full rounded-lg object-cover`}
+                                controls
+                                // onLoadedData={() => setVideoLoading(false)}
+                            >
+                                <source src="" type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
                     </div>
                 </div>
 
@@ -203,6 +285,7 @@ const HoardingDetail = () => {
                                         variant="default"
                                         type="submit" 
                                         className="bg-[#4BB543] rounded-[10px] w-[50%]"
+                                        disabled={isRejectLoading}
                                         onClick={() => {
                                             if (rejectionReason.length > 0) {
                                                 handleAction("rejected", rejectionReason)
@@ -213,7 +296,7 @@ const HoardingDetail = () => {
                                             }
                                         }}
                                     >
-                                        Submit
+                                        {isRejectLoading ? "Rejecting..." : "Reject"}
                                     </Button>
                                 </form>
                                 <div className="flex justify-center items-center gap-2 cursor-pointer" onClick={() => setIsRejecting(false)}>
