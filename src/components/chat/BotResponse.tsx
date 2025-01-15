@@ -54,7 +54,7 @@ const BotResponse = ({ content }: BotResponseProps) => {
         const tableData = useMemo(() => 
             content.district.map((_, index) => ({
                 district: content.district[index],
-                location_route: content.location_route[index],
+                location_route: content.location[index],
                 direction_route: content.direction_route[index],
                 width: content.width[index],
                 height: content.height[index],
@@ -68,7 +68,7 @@ const BotResponse = ({ content }: BotResponseProps) => {
                 hoarding_id: content.hoarding_id[index],
                 hoarding_code: content.hoarding_code[index],
                 status: content.status[index],
-                location: content.location[index],
+                location: content.location_coordinates[index],
                 available: content.available[index] ? 'Yes' : 'No',
                 lat:  content.lat[index],
                 long: content.long[index]
@@ -114,7 +114,19 @@ const BotResponse = ({ content }: BotResponseProps) => {
                 )
             }),
             columnHelper.accessor('hoarding_id', {
-                header: 'Hoarding ID',
+                header: ({ column }) => {
+                    return (
+                        <p
+                            onClick={() => column.toggleSorting()}
+                            className="flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                            Hoarding ID
+                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                        </p>
+                    )
+                },
+                sortingFn: 'alphanumeric',
                 filterFn: 'includesString'
             }),
             columnHelper.accessor('district', {
@@ -133,14 +145,14 @@ const BotResponse = ({ content }: BotResponseProps) => {
                 sortingFn: 'alphanumeric',
                 filterFn: 'includesString'
             }),
-            columnHelper.accessor('location_route', {
+            columnHelper.accessor('location', {
                 header: ({ column }) => {
                     return (
                         <p
                             onClick={() => column.toggleSorting()}
                             className="flex items-center justify-center gap-1 cursor-pointer"
                         >
-                            Location Route
+                            Location
                             {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
                             {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
                         </p>
@@ -349,6 +361,22 @@ const BotResponse = ({ content }: BotResponseProps) => {
                             className="flex items-center justify-center gap-1 cursor-pointer"
                         >
                             Available
+                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                        </p>
+                    )
+                },
+                sortingFn: 'alphanumeric',
+                filterFn: 'includesString'
+            }),
+            columnHelper.accessor('location_coordinates', {
+                header: ({ column }) => {
+                    return (
+                        <p
+                            onClick={() => column.toggleSorting()}
+                            className="flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                            Location Coordinates
                             {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
                             {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
                         </p>

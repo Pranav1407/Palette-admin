@@ -11,7 +11,7 @@ const Chat = () => {
     type: 'user' | 'bot';
     content: string | {
       district: string[];
-      location_route: string[];
+      location: string[];
       direction_route: string[];
       width: number[];
       height: number[];
@@ -25,7 +25,7 @@ const Chat = () => {
       hoarding_id: number[];
       hoarding_code: string[];
       status: string[];
-      location: string[];
+      location_coordinates: string[];
       available: boolean[];
       lat: number[];
       long: number[];
@@ -58,7 +58,7 @@ const Chat = () => {
         type: 'bot', 
         content: {
           district: ['Error'],
-          location_route: ['Failed to get response. Please try again.'],
+          location: ['Failed to get response. Please try again.'],
           direction_route: [],
           width: [],
           height: [],
@@ -72,7 +72,7 @@ const Chat = () => {
           hoarding_id: [],
           hoarding_code: [],
           status: [],
-          location: [],
+          location_coordinates: [],
           available: [],
           lat: [],
           long: []

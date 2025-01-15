@@ -124,7 +124,7 @@ export interface SubmitQueryResponse {
     message: string;
     response: {
         district: string[];
-        location_route: string[];
+        location: string[];
         direction_route: string[];
         width: number[];
         height: number[];
@@ -138,7 +138,7 @@ export interface SubmitQueryResponse {
         hoarding_id: number[];
         hoarding_code: string[];
         status: string[];
-        location: string[];
+        location_coordinates: string[];
         available: boolean[];
         lat: number[];
         long: number[];
@@ -148,7 +148,7 @@ export interface SubmitQueryResponse {
 export interface BotResponseProps {
     content: {
         district: string[];
-        location_route: string[];
+        location: string[];
         direction_route: string[];
         width: number[];
         height: number[];
@@ -162,7 +162,7 @@ export interface BotResponseProps {
         hoarding_id: number[];
         hoarding_code: string[];
         status: string[];
-        location: string[];
+        location_coordinates: string[];
         available: boolean[];
         lat: number[];
         long: number[];
