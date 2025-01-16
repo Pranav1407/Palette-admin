@@ -12,10 +12,13 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { DownloadButton } from './buttons/DownloadButton';
 import { FilterButton } from './buttons/FilterButton';
-import { BotResponseProps, DownloadOption } from '@/types/Types';
+import { DownloadOption } from '@/types/Types';
 
+interface TableContent {
+    [key: string]: (string | number | boolean)[];
+}
 
-const BotResponse = ({ content }: BotResponseProps) => {
+const BotResponse = ({ content }: { content: string | TableContent }) => {
 
     const [downloadOptions, setDownloadOptions] = useState<DownloadOption[]>([
         { 
@@ -56,30 +59,35 @@ const BotResponse = ({ content }: BotResponseProps) => {
 
     if (typeof content === 'object') {
 
-        const tableData = useMemo(() => 
-            content.district.map((_, index) => ({
-                district: content.district[index],
-                location_route: content.location[index],
-                direction_route: content.direction_route[index],
-                width: content.width[index],
-                height: content.height[index],
-                area: content.area[index],
-                type: content.type[index],
-                rate_1_month: content.rate_sqft_1_months[index],
-                rate_3_months: content.rate_sqft_3_months[index],
-                rate_6_months: content.rate_sqft_6_months[index],
-                rate_12_months: content.rate_sqft_12_months[index],
-                floor: content.floor[index],
-                hoarding_id: content.hoarding_id[index],
-                hoarding_code: content.hoarding_code[index],
-                status: content.status[index],
-                location: content.location_coordinates[index],
-                available: content.available[index] ? 'Yes' : 'No',
-                lat:  content.lat[index],
-                long: content.long[index]
-            })), 
-            [content]
-        );
+        const tableData = useMemo(() => {
+            // Find first non-empty array to use as mapping reference
+            const mappingKey = Object.entries(content).find(([_, value]) => 
+                Array.isArray(value) && value.length > 0
+            )?.[0] || Object.keys(content)[0];
+        
+            return content[mappingKey].map((_, index) => ({
+                district: content.district?.[index] || '-',
+                location_route: content.location?.[index] || '-',
+                direction_route: content.direction_route?.[index] || '-',
+                width: content.width?.[index] || '-',
+                height: content.height?.[index] || '-',
+                area: content.area?.[index] || '-',
+                type: content.type?.[index] || '-',
+                rate_1_month: content.rate_sqft_1_months?.[index] || '-',
+                rate_3_months: content.rate_sqft_3_months?.[index] || '-',
+                rate_6_months: content.rate_sqft_6_months?.[index] || '-',
+                rate_12_months: content.rate_sqft_12_months?.[index] || '-',
+                floor: content.floor?.[index] || '-',
+                hoarding_id: content.hoarding_id?.[index] || '-',
+                hoarding_code: content.hoarding_code?.[index] || '-',
+                status: content.status?.[index] || '-',
+                location: content.location_coordinates?.[index] || '-',
+                available: content.available?.[index] ? 'Yes' : '-',
+                lat: content.lat?.[index] || '-',
+                long: content.long?.[index] || '-'
+            }))
+        },[content]);
+               
 
         const columnHelper = createColumnHelper<any>();
 

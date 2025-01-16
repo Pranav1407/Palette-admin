@@ -5,33 +5,37 @@ import { useMutation } from '@tanstack/react-query';
 import { submitQuery } from '@/data/requests';
 import toast from 'react-hot-toast';
 
+type MessageContent = string | {
+  district?: string[];
+  location?: string[];
+  direction_route?: string[];
+  width?: number[];
+  height?: number[];
+  area?: number[];
+  type?: string[];
+  rate_sqft_1_months?: number[];
+  rate_sqft_3_months?: number[];
+  rate_sqft_6_months?: number[];
+  rate_sqft_12_months?: number[];
+  floor?: string[];
+  hoarding_id?: number[];
+  hoarding_code?: string[];
+  status?: string[];
+  location_coordinates?: string[];
+  available?: boolean[];
+  lat?: number[];
+  long?: number[];
+  [key: string]: (string | number | boolean)[] | undefined;
+};
 
 const Chat = () => {
   const [isInitial, setIsInitial] = useState(true);
+  
   const [messages, setMessages] = useState<{
     type: 'user' | 'bot';
-    content: string | {
-      district: string[];
-      location: string[];
-      direction_route: string[];
-      width: number[];
-      height: number[];
-      area: number[];
-      type: string[];
-      rate_sqft_1_months: number[];
-      rate_sqft_3_months: number[];
-      rate_sqft_6_months: number[];
-      rate_sqft_12_months: number[];
-      floor: string[];
-      hoarding_id: number[];
-      hoarding_code: string[];
-      status: string[];
-      location_coordinates: string[];
-      available: boolean[];
-      lat: number[];
-      long: number[];
-    };
+    content: MessageContent;
   }[]>([]);
+  
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -133,7 +137,22 @@ const Chat = () => {
                   // @ts-ignore
                   <p className="p-3 gradient-text text-2xl font-medium">{message.content}</p>
                 ) : (
-                  <BotResponse content={message.content} />
+                  // Inside the messages mapping where BotResponse is rendered
+                  <BotResponse 
+                  //@ts-expect-error Type error
+                    content={
+                      typeof message.content === 'object' 
+                        ? Object.entries(message.content).length === 1
+                          ? message.content // Single column response
+                          : Object.fromEntries(
+                              Object.entries(message.content).map(([key, value]) => [
+                                key, 
+                                Array.isArray(value) && value.length === 0 ? '-' : value
+                              ])
+                            )
+                        : message.content
+                    } 
+                  />
                 )}
                 <div ref={messagesEndRef}></div>
               </div>
