@@ -3,6 +3,7 @@ import { SendHorizontal, Hourglass } from 'lucide-react';
 import BotResponse from './BotResponse';
 import { useMutation } from '@tanstack/react-query';
 import { submitQuery } from '@/data/requests';
+import toast from 'react-hot-toast';
 
 
 const Chat = () => {
@@ -54,29 +55,12 @@ const Chat = () => {
       }]);
     },
     onError: () => {
+      toast.error('Failed to get response. Please try again.',{
+        position: 'top-right',
+      });
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        content: {
-          district: ['Error'],
-          location: ['Failed to get response. Please try again.'],
-          direction_route: [],
-          width: [],
-          height: [],
-          area: [],
-          type: [],
-          rate_sqft_1_months: [],
-          rate_sqft_3_months: [],
-          rate_sqft_6_months: [],
-          rate_sqft_12_months: [],
-          floor: [],
-          hoarding_id: [],
-          hoarding_code: [],
-          status: [],
-          location_coordinates: [],
-          available: [],
-          lat: [],
-          long: []
-        }
+        content: 'Failed to get response. Please try again.'
       }]);
     }
   });
@@ -127,13 +111,13 @@ const Chat = () => {
             <div className="flex gap-2 mt-4 justify-center">
               <button 
                 className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                onClick={() => handleQueryClick("How many hoardings are free now?")}
+                onClick={() => handleQueryClick("How many hoardings are available now?")}
               >
                 How many hoardings are available now?
               </button>
               <button 
                 className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                onClick={() => handleQueryClick("What hoardings need to be changed?")}
+                onClick={() => handleQueryClick("List all the hoardings in kerala")}
               >
                 List all the hoardings in kerala
               </button>
@@ -181,15 +165,15 @@ const Chat = () => {
               <div className="flex gap-2 mt-4 justify-center">
                 <button 
                   className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar" 
-                  onClick={() => handleQueryClick("How many hoardings are free now?")}
+                  onClick={() => handleQueryClick("How many hoardings are available now?")}
                 >
-                  How many hoardings are free now?
+                  How many hoardings are available now?
                 </button>
                 <button 
                   className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
-                  onClick={() => handleQueryClick("What hoardings need to be changed?")}
+                  onClick={() => handleQueryClick("List all the hoardings in kerala")}
                 >
-                  What hoardings need to be changed?
+                  List all the hoardings in kerala
                 </button>
               </div>
             </div>
