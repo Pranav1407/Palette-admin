@@ -129,13 +129,13 @@ const Chat = () => {
                 className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
                 onClick={() => handleQueryClick("How many hoardings are free now?")}
               >
-                How many hoardings are free now?
+                How many hoardings are available now?
               </button>
               <button 
                 className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
                 onClick={() => handleQueryClick("What hoardings need to be changed?")}
               >
-                What hoardings need to be changed?
+                List all the hoardings in kerala
               </button>
             </div>
           </div>

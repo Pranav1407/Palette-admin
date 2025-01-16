@@ -45,9 +45,14 @@ const BotResponse = ({ content }: BotResponseProps) => {
     ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [filterOpen, setFilterOpen] = useState(false)
-    const [sorting, setSorting] = useState<SortingState>([])
-
+    // const [filterOpen, setFilterOpen] = useState(false)
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'hoarding_id',
+            desc: false
+        }
+    ])
+    
 
     if (typeof content === 'object') {
 
@@ -145,7 +150,7 @@ const BotResponse = ({ content }: BotResponseProps) => {
                 sortingFn: 'alphanumeric',
                 filterFn: 'includesString'
             }),
-            columnHelper.accessor('location', {
+            columnHelper.accessor('location_route', {
                 header: ({ column }) => {
                     return (
                         <p
@@ -369,7 +374,7 @@ const BotResponse = ({ content }: BotResponseProps) => {
                 sortingFn: 'alphanumeric',
                 filterFn: 'includesString'
             }),
-            columnHelper.accessor('location_coordinates', {
+            columnHelper.accessor('location', {
                 header: ({ column }) => {
                     return (
                         <p
@@ -444,13 +449,21 @@ const BotResponse = ({ content }: BotResponseProps) => {
                     />
 
                     <FilterButton 
-                        filterOpen={filterOpen}
-                        setFilterOpen={setFilterOpen}
-                        table={table}
+                        // filterOpen={filterOpen}
+                        // setFilterOpen={setFilterOpen}
+                        // table={table}
                     />
                 </div>
                 
-                <div className="w-full max-h-96 overflow-x-auto overflow-y-auto scrollbar-hide">
+                <div className="w-full max-h-96 overflow-x-auto overflow-y-auto 
+                    [&::-webkit-scrollbar]:w-2
+                    [&::-webkit-scrollbar]:h-2
+                    [&::-webkit-scrollbar-track]:rounded-lg
+                    [&::-webkit-scrollbar-track]:bg-tansparent
+                    [&::-webkit-scrollbar-thumb]:rounded-lg
+                    [&::-webkit-scrollbar-thumb]:bg-gray-300
+                    [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
+                >
                     <table className="max-w-full table-fixed">
                         <thead className='rounded-lg'>
                             {table.getHeaderGroups().map(headerGroup => (

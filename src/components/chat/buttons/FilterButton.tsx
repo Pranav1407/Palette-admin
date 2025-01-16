@@ -1,21 +1,26 @@
 import { Button } from '../../ui/button'
 import { Filter } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+// import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Table } from "@tanstack/react-table"
+// import { Table } from "@tanstack/react-table"
 
-interface FilterButtonProps {
-    filterOpen: boolean;
-    setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    table: Table<any>;
-}
+// interface FilterButtonProps {
+//     filterOpen: boolean;
+//     setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
+//     table: Table<any>;
+// }
 
 
-export const FilterButton = ({ filterOpen, setFilterOpen, table }: FilterButtonProps) => {
+export const FilterButton = () => { // { filterOpen, setFilterOpen, table }: FilterButtonProps
     return (
         <TooltipProvider>
             <Tooltip>
-                <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" className='shadow-md rounded-sm' size="sm">
+                        <Filter className="h-4 w-4" />
+                    </Button>
+                </TooltipTrigger>
+                {/* <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                     <PopoverTrigger asChild>
                         <TooltipTrigger asChild>
                             <Button variant="outline" className='shadow-md rounded-sm' size="sm">
@@ -23,7 +28,7 @@ export const FilterButton = ({ filterOpen, setFilterOpen, table }: FilterButtonP
                             </Button>
                         </TooltipTrigger>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80">
+                    <PopoverContent className="w-80 h-80 overflow-auto">
                         <div className="space-y-4">
                             <div className="border-b pb-2">
                                 <h4 className="font-medium text-center">Filter Options</h4>
@@ -54,7 +59,7 @@ export const FilterButton = ({ filterOpen, setFilterOpen, table }: FilterButtonP
                             </Button>
                         </div>
                     </PopoverContent>
-                </Popover>
+                </Popover> */}
                 <TooltipContent>
                     <p>Filter Table</p>
                 </TooltipContent>
