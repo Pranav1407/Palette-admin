@@ -20,7 +20,7 @@ export function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-        if (data.payload.is_admin) {
+        if (data.payload.role === 'user' || 'admin') {
             setAuth(data.payload.user_id, true)
             navigate('/')
         } else {

@@ -1,4 +1,16 @@
-import { HoardingStats, FetchHoardingRequest, FetchHoardings, LoginCredentials, LoginResponse, RequestActionParams, RequestActionResponse, SubmitQueryResponse } from '@/types/Types';
+import { 
+    HoardingStats, 
+    FetchHoardingRequest, 
+    FetchHoardings, 
+    LoginCredentials, 
+    LoginResponse, 
+    RequestActionParams, 
+    RequestActionResponse, 
+    SubmitQueryResponse, 
+    AddAdminProps,
+    AddAdminResponse 
+} from '@/types/Types';
+
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -77,3 +89,13 @@ export const downloadFile = async (downloadData: any): Promise<Blob> => {
         throw error;
     }
 };
+
+export const addAdmin = async (adminData: AddAdminProps): Promise<AddAdminResponse> => {
+    try {
+        const response = await axios.post(`${API_URL}/user/signup`, adminData);
+        return response.data;
+    } catch (error) {
+        console.error('Error adding admin:', error);
+        throw error;
+    }
+}

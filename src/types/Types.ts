@@ -98,11 +98,9 @@ export interface LoginResponse {
     message: string;
     payload: {
       user_id: number;
-      is_admin: boolean | null;
-      is_labour: boolean | null;
+      role: string;
     }
 }
-  
   
 export interface LoginCredentials {
     username: string;
@@ -174,4 +172,18 @@ export interface DownloadOption {
     label: string;
     selected: boolean;
     icon: React.ReactNode;
+}
+
+export interface AddAdminProps {
+    username: string,
+    email_id: string,
+    password: string,
+    phone_number: 0,
+    role: string,
+    terms: true
+}
+
+export interface AddAdminResponse {
+    message: string,
+    payload: Object
 }
