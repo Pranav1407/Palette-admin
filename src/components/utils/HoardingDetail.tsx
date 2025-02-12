@@ -2,12 +2,13 @@ import {useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { ImageDialog } from "@/components/utils/ImageDialog"
-import { CheckCircle, AlertCircle, MoveLeft } from "lucide-react"
+import { CheckCircle, AlertCircle } from "lucide-react"
 import { fetchRequest, requestAction } from "@/data/requests"
 import { HoardingData, RequestData } from "@/types/Types"
 import { useAuthStore } from "@/stores/authStore"
 import toast from "react-hot-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import RejectedContainer from "./RejectedContainer"
 
 
 const HoardingDetail = () => {
@@ -16,7 +17,6 @@ const HoardingDetail = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const [showGeoMapModal, setShowGeoMapModal] = useState(false)
     const [isRejecting, setIsRejecting] = useState(false)
-    const [rejectionReason, setRejectionReason] = useState("")
     const { userId } = useAuthStore()
     const navigate = useNavigate();
 
@@ -267,43 +267,10 @@ const HoardingDetail = () => {
                         )}
 
                         {isRejecting && (
-                            <div className="w-full flex flex-col items-center gap-4">
-                                <AlertCircle className="w-40 h-40 text-[#F55555]" />
-                                <span className="text-4xl">Rejected.</span>
-                                <form 
-                                    className="flex flex-col gap-4 w-full items-center"
-                                    onSubmit={(e) => { e.preventDefault(); handleAction("rejected", rejectionReason); }}
-                                >
-                                    <textarea 
-                                        className="w-[90%] p-2 border border-[#d1d1d1] rounded-[10px] text-[#818181] text-lg resize-none outline-none"
-                                        placeholder="Provide the appropriate reason for it."
-                                        value={rejectionReason}
-                                        required
-                                        onChange={(e) => setRejectionReason(e.target.value)}
-                                    />
-                                    <Button 
-                                        variant="default"
-                                        type="submit" 
-                                        className="bg-[#4BB543] rounded-[10px] w-[50%]"
-                                        disabled={isRejectLoading}
-                                        onClick={() => {
-                                            if (rejectionReason.length > 0) {
-                                                handleAction("rejected", rejectionReason)
-                                            } else {
-                                                toast.error("Please provide a reason for rejection.", {
-                                                    position: "bottom-right",
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        {isRejectLoading ? "Rejecting..." : "Reject"}
-                                    </Button>
-                                </form>
-                                <div className="flex justify-center items-center gap-2 cursor-pointer" onClick={() => setIsRejecting(false)}>
-                                    <MoveLeft className="w-6 h-6" />
-                                    <span>Go Back</span>
-                                </div>
-                            </div>
+                            <RejectedContainer
+                                setIsRejecting={setIsRejecting}
+                                handleAction={handleAction}
+                            />
                         )}
 
                         {requestData.current_status === "approved" && (

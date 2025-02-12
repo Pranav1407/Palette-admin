@@ -14,10 +14,17 @@ import {
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const axiosInstance = axios.create({
+    baseURL: API_URL,
+    headers: {
+      'Authorization': 'Bearer qwerty123@123',
+      'Content-Type': 'application/json'
+    }
+  });
 
 export const fetchHoardings = async (status: string): Promise<FetchHoardings> => {
     try {
-        const response = await axios.post(`${API_URL}/list/hoardings/admin?filter=${status}`);
+        const response = await axiosInstance.post(`${API_URL}/list/hoardings/admin?filter=${status}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching hoardings:', error);
@@ -27,7 +34,7 @@ export const fetchHoardings = async (status: string): Promise<FetchHoardings> =>
 
 export const fetchRequest = async (id: number | null): Promise<FetchHoardingRequest> => {
     try {
-        const response = await axios.post(`${API_URL}/details/request/full?request_id=${id}`);
+        const response = await axiosInstance.post(`${API_URL}/details/request/full?request_id=${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching request:', error)
@@ -37,7 +44,7 @@ export const fetchRequest = async (id: number | null): Promise<FetchHoardingRequ
 
 export const fetchStats = async (): Promise<HoardingStats> => {
     try {
-        const response = await axios.post(`${API_URL}/hoarding_statistics`);
+        const response = await axiosInstance.post(`${API_URL}/hoarding_statistics`);
         return response.data;
     } catch (error) {
         console.error('Error fetching stats:', error);
@@ -47,7 +54,7 @@ export const fetchStats = async (): Promise<HoardingStats> => {
 
 export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
     try {
-        const response = await axios.post(`${API_URL}/user/login`, credentials);
+        const response = await axiosInstance.post(`${API_URL}/user/login`, credentials);
         return response.data;
     }
     catch (error) {
@@ -58,7 +65,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
 
 export const requestAction = async (actionParams: RequestActionParams): Promise<RequestActionResponse> => {
     try {
-        const response = await axios.post(`${API_URL}/request/action?action=${actionParams.action}&request_id=${actionParams.request_id}&user_id=${actionParams.user_id}&comment=${actionParams.comment}`);
+        const response = await axiosInstance.post(`${API_URL}/request/action?action=${actionParams.action}&request_id=${actionParams.request_id}&user_id=${actionParams.user_id}&comment=${actionParams.comment}`);
         return response.data;
     } catch (error) {
         console.error('Error requesting action:', error);
@@ -70,7 +77,7 @@ export const submitQuery = async (query: string): Promise<SubmitQueryResponse> =
     const data = new URLSearchParams();
     data.append('question', query);
     try {
-        const response = await axios.post(`${API_URL}/submit`, data);
+        const response = await axiosInstance.post(`${API_URL}/submit`, data);
         return response.data;
     } catch (error) {
         console.error('Error submitting query:', error);
@@ -80,7 +87,7 @@ export const submitQuery = async (query: string): Promise<SubmitQueryResponse> =
 
 export const downloadFile = async (downloadData: any): Promise<Blob> => {
     try {
-        const response = await axios.post(`${API_URL}/download`, downloadData, {
+        const response = await axiosInstance.post(`${API_URL}/download`, downloadData, {
             responseType: 'blob',
         });
         return response.data;
@@ -92,7 +99,7 @@ export const downloadFile = async (downloadData: any): Promise<Blob> => {
 
 export const addAdmin = async (adminData: AddAdminProps): Promise<AddAdminResponse> => {
     try {
-        const response = await axios.post(`${API_URL}/user/signup`, adminData);
+        const response = await axiosInstance.post(`${API_URL}/user/signup`, adminData);
         return response.data;
     } catch (error) {
         console.error('Error adding admin:', error);
