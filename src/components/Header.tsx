@@ -59,9 +59,9 @@ const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="bg-sidebar rounded-[10px] flex items-center justify-center py-2 px-4 cursor-pointer">
+                        {/* <div className="bg-sidebar rounded-[10px] flex items-center justify-center py-2 px-4 cursor-pointer">
                             <img src="/assets/icons/filter.svg" />
-                        </div>
+                        </div> */}
                     </div>
                 )}
             </div>

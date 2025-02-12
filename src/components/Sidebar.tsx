@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { MdErrorOutline, MdOutlineCheckCircleOutline, MdEmail, MdPersonAdd, MdOutlineAccessTime, MdKeyboardArrowDown } from 'react-icons/md'
+import { MdErrorOutline, MdOutlineCheckCircleOutline, MdPersonAdd, MdOutlineAccessTime, MdKeyboardArrowDown } from 'react-icons/md'
 import { RxDashboard } from 'react-icons/rx'
 import { MessageSquare, PanelRightClose } from 'lucide-react'
 import { useState } from 'react'
@@ -79,7 +79,7 @@ const Sidebar = () => {
                         
                         <div className="h-px bg-sidebar-30 mx-1 my-2"></div>
                         
-                        <NavLink to="/email-remainder" 
+                        {/* <NavLink to="/email-remainder" 
                              className={({ isActive }) => 
                                 `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
                                     isActive ? 'bg-white text-secondary rounded-lg' : ''
@@ -87,7 +87,7 @@ const Sidebar = () => {
                         >
                             <MdEmail size={25} />
                             {!isSidebarCollapsed && <span>Email remainder</span>}
-                        </NavLink>
+                        </NavLink> */}
                         
                         <NavLink to="/add-admin" 
                              className={({ isActive }) => 

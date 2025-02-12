@@ -24,8 +24,10 @@ interface DownloadButtonProps {
 export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: DownloadButtonProps) => {
 
     const [downloading, setDownloading] = useState(false);
+    const [open, setOpen] = useState(true);
 
     const handleDownload = async () => {
+        
         const selectedFormats = downloadOptions
         .filter(opt => opt.selected)
         .map(opt => opt.id.toUpperCase());
@@ -36,6 +38,14 @@ export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: D
             formats: selectedFormats,
             response: selectedRows
         };
+
+        if(selectedFormats.length === 0) {
+            toast.error('Please select at least one format to download.', {
+                position: 'top-right',
+                duration: 5000
+            });
+            return;
+        }
     
         if(selectedRows.length > 0) {
             setDownloading(true);
@@ -50,6 +60,7 @@ export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: D
                 link.remove();
                 window.URL.revokeObjectURL(url);
                 setDownloading(false);
+                setOpen(false);
             } catch (error) {
                 setDownloading(false);
                 console.error('Download failed:', error);
@@ -63,7 +74,7 @@ export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: D
     }
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <TooltipProvider>
                 <Tooltip>
                     <DialogTrigger asChild>

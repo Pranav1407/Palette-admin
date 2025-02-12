@@ -11,7 +11,7 @@ import {
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { DownloadButton } from './buttons/DownloadButton';
-import { FilterButton } from './buttons/FilterButton';
+// import { FilterButton } from './buttons/FilterButton';
 import { DownloadOption } from '@/types/Types';
 
 interface TableContent {
@@ -455,12 +455,11 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         setDownloadOptions={setDownloadOptions}
                         table={table}
                     />
-
-                    <FilterButton 
-                        // filterOpen={filterOpen}
-                        // setFilterOpen={setFilterOpen}
-                        // table={table}
-                    />
+                    {/* <FilterButton 
+                        filterOpen={filterOpen}
+                        setFilterOpen={setFilterOpen}
+                        table={table}
+                    /> */}
                 </div>
                 
                 <div className="w-full max-h-96 overflow-x-auto overflow-y-auto 
