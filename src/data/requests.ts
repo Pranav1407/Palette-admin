@@ -60,6 +60,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
     }
     catch (error) {
         console.error('Error logging in:', error);
+        throw error;
     }
 };
 
