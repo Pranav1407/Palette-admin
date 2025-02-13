@@ -17,7 +17,7 @@ const AddAdmin = () =>{
     email_id: "",
     password: "",
     phone_number: 0,
-    role: isSuperAdmin ? "super_admin" : "admin",
+    role: "",
     terms: true
   });
 
@@ -40,17 +40,27 @@ const AddAdmin = () =>{
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    formData.role = isSuperAdmin ? "super_admin" : "admin";
     
     if (formData.password !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
+
     try {
       const response = await addAdmin(formData);
       if(response.message === "Sign up successful") {
         toast.success('Admin added successfully');
+        formData.username = "";
+        formData.email_id = "";
+        formData.password = "";
+        formData.phone_number = 0;
+        formData.role = "";
+        setIsSuperAdmin(false);
       }
     } catch (error) {
+      console.error('Error adding admin:', error);
       toast.error('Failed to add admin. Please try again.')
     }
   };

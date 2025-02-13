@@ -3,10 +3,12 @@ import { MdErrorOutline, MdOutlineCheckCircleOutline, MdPersonAdd, MdOutlineAcce
 import { RxDashboard } from 'react-icons/rx'
 import { MessageSquare, PanelRightClose } from 'lucide-react'
 import { useState } from 'react'
+import { useAuthStore } from '@/stores/authStore'
 
 const Sidebar = () => {
     const [isHoardingOpen, setIsHoardingOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const role = useAuthStore((state) => state.role);
 
     return (
         <div className="flex p-4">
@@ -89,15 +91,17 @@ const Sidebar = () => {
                             {!isSidebarCollapsed && <span>Email remainder</span>}
                         </NavLink> */}
                         
-                        <NavLink to="/add-admin" 
-                             className={({ isActive }) => 
-                                `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
-                                    isActive ? 'bg-white text-secondary rounded-lg' : ''
-                            }`}
-                        >
-                            <MdPersonAdd size={25} />
-                            {!isSidebarCollapsed && <span>Add admin</span>}
-                        </NavLink>
+                        {role === 'super_admin' &&
+                            <NavLink to="/add-admin" 
+                                className={({ isActive }) => 
+                                    `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
+                                        isActive ? 'bg-white text-secondary rounded-lg' : ''
+                                }`}
+                            >
+                                <MdPersonAdd size={25} />
+                                {!isSidebarCollapsed && <span>Add admin</span>}
+                            </NavLink>
+                        }
                     </ul>
                 </nav>
             </aside>

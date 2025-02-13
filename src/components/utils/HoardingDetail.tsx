@@ -27,6 +27,8 @@ const HoardingDetail = () => {
     const [isRejectLoading, setIsRejectLoading] = useState(false)
     const [geoMapLoading, setGeoMapLoading] = useState(true);
     const [imagesLoading, setImagesLoading] = useState(true);
+    const [showApproveModal, setShowApproveModal] = useState(false)
+
     // const [videoLoading, setVideoLoading] = useState(true);
     
     useEffect(() => {
@@ -226,18 +228,18 @@ const HoardingDetail = () => {
                             </div>
                         </div>
 
-                        <div className="w-[207px] h-[200px]">
+                        {/* <div className="w-[207px] h-[200px]">
                             <h2 className="text-xl font-semibold mb-1">Video</h2>
-                            {/* {videoLoading && <Skeleton className="w-full h-full rounded-lg" />} */}
+                            {videoLoading && <Skeleton className="w-full h-full rounded-lg" />}
                             <video 
                                 className={`w-full h-full rounded-lg object-cover`}
                                 controls
-                                // onLoadedData={() => setVideoLoading(false)}
+                                onLoadedData={() => setVideoLoading(false)}
                             >
                                 <source src="" type="video/mp4" />
                                 Your browser does not support the video tag.
                             </video>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
@@ -251,7 +253,7 @@ const HoardingDetail = () => {
                                     <Button 
                                         variant="default" 
                                         className="bg-[#4BB543] rounded-[10px] w-full"
-                                        onClick={() => handleAction("approved", "")}
+                                        onClick={() => setShowApproveModal(true)}
                                     >
                                         Approve
                                     </Button>
@@ -326,6 +328,33 @@ const HoardingDetail = () => {
                         )}
                     </div>
                 </div>
+                {showApproveModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
+                            <h3 className="text-xl font-semibold mb-4 text-center">Confirm Approval</h3>
+                            <p className="text-gray-600 mb-6 text-center">Are you sure you want to approve?</p>
+                            <div className="flex justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowApproveModal(false)}
+                                    className="border-gray-300"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    className="bg-[#4BB543]"
+                                    onClick={() => {
+                                        handleAction("approved", "");
+                                        setShowApproveModal(false);
+                                    }}
+                                >
+                                    Approve
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <ImageDialog 

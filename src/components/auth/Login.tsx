@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query"
 import { loginUser } from "@/data/requests"
 import { useAuthStore } from "../../stores/authStore"
 import { useNavigate } from "react-router-dom"
-import toast from "react-hot-toast"
 import { Eye, EyeOff } from "lucide-react"
 
 export function LoginPage() {
@@ -20,11 +19,11 @@ export function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-        if (data.payload.role === 'user' || 'admin') {
-            setAuth(data.payload.user_id, true)
+        if (data.payload.role === 'admin' || data.payload.role === 'super_admin') {
+            setAuth(data.payload.user_id, data.payload.role)
             navigate('/')
         } else {
-            toast.error('You are not authorized to access this page.')
+            setError('You are not authorized to access this page')
         }
     },
     onError: (error) => {
