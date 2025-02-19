@@ -24,7 +24,7 @@ interface DownloadButtonProps {
 export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: DownloadButtonProps) => {
 
     const [downloading, setDownloading] = useState(false);
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     const handleDownload = async () => {
         
@@ -99,22 +99,24 @@ export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: D
                         {downloadOptions.map((option) => (
                             <div 
                                 key={option.id} 
-                                className={`cursor-pointer p-3 
-                                    ${
-                                    option.id === 'ppt' && option.selected ? 'border-b-4 border-[#E23410] bg-red-300 rounded-md' : 
-                                    option.id === 'pdf' && option.selected ? 'border-b-4 border-[#C42D41] bg-[#C42D4126] rounded-md' :
-                                    option.id === 'xlsx' && option.selected ? 'border-b-4 border-[#168A1A] bg-[#168A1A26] rounded-md' :
-                                    option.id === 'docx' && option.selected ? 'border-b-4 border-[#018AC5] bg-[#018AC526] rounded-md' : ''
+                                className={`p-3 ${
+                                    option.id === 'ppt' && option.selected ? 'border-b-4 border-[#E23410] bg-red-300 rounded-md cursor-pointer' : 
+                                    option.id === 'pdf' ? 'opacity-50 cursor-not-allowed' :
+                                    option.id === 'xlsx' && option.selected ? 'border-b-4 border-[#168A1A] bg-[#168A1A26] rounded-md cursor-pointer' :
+                                    option.id === 'docx' ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                             >
                                 <img 
-                                    src={`/assets/icons/${option.icon}`} alt={option.label} 
+                                    src={`/assets/icons/${option.icon}`} 
+                                    alt={option.label} 
                                     onClick={() => {
-                                        setDownloadOptions(prev =>
-                                            prev.map(opt =>
-                                                opt.id === option.id ? { ...opt, selected: !opt.selected } : opt
+                                        if (option.id !== 'pdf' && option.id !== 'docx') {
+                                            setDownloadOptions(prev =>
+                                                prev.map(opt =>
+                                                    opt.id === option.id ? { ...opt, selected: !opt.selected } : opt
+                                                )
                                             )
-                                        )
+                                        }
                                     }}
                                 />
                             </div>

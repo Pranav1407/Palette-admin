@@ -174,9 +174,14 @@ const Chat = () => {
                   name="query"
                   type="text"
                   placeholder="Ask me anything..."
-                  className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
+                  disabled={chatMutation.isPending}
+                  className={`w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none ${chatMutation.isPending ? 'bg-gray-100' : ''}`}
                 />
-                <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
+                <button 
+                  type="submit" 
+                  disabled={chatMutation.isPending}
+                  className={`absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl ${chatMutation.isPending ? 'opacity-50' : ''}`}
+                >
                   <SendHorizontal className="w-5 h-5" />
                 </button>
               </form>
@@ -185,12 +190,14 @@ const Chat = () => {
                 <button 
                   className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar" 
                   onClick={() => handleQueryClick("How many hoardings are available now?")}
+                  disabled={chatMutation.isPending}
                 >
                   How many hoardings are available now?
                 </button>
                 <button 
                   className="px-4 py-1 rounded-full border bg-sidebar-15 text-sidebar"
                   onClick={() => handleQueryClick("List all the hoardings in kerala")}
+                  disabled={chatMutation.isPending}
                 >
                   List all the hoardings in kerala
                 </button>

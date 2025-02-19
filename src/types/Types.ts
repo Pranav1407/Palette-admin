@@ -49,6 +49,8 @@ export interface HoardingStats {
         pending_hoardings: number;
         rejected_hoardings: number;
         approved_hoardings: number;
+        available_hoardings: number;
+        booked_hoardings: number;
     };
 }
 

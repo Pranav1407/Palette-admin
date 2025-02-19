@@ -10,8 +10,8 @@ const Dashboard = () => {
   });
 
   const dashboardStats = {
-    availableHoardings: 24,
-    bookedHoardings: 12,
+    availableHoardings: data?.payload.available_hoardings || 24,
+    bookedHoardings: data?.payload.booked_hoardings || 12,
     pendingHoardings: data?.payload.pending_hoardings,
     approvedHoardings: data?.payload.approved_hoardings,
     rejectedHoardings: data?.payload.rejected_hoardings,
