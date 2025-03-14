@@ -4,15 +4,21 @@ import { RxDashboard } from 'react-icons/rx'
 import { MessageSquare, PanelRightClose } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { GoSync } from "react-icons/go";
 
-const Sidebar = () => {
+interface SidebarProps {
+    handleSync: () => void;
+    syncing: boolean;
+}
+
+const Sidebar = ({handleSync, syncing}: SidebarProps) => {
     const [isHoardingOpen, setIsHoardingOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const role = useAuthStore((state) => state.role);
 
     return (
         <div className="flex p-4">
-            <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-60'} transition-all duration-300 bg-sidebar-15 text-sidebar shadow-md shadow-sidebar-15 font-normal rounded-[20px] px-4`}>
+            <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-60'} transition-all duration-300 bg-sidebar-15 text-sidebar shadow-md shadow-sidebar-15 font-normal rounded-[20px] px-4 flex flex-col`}>
                 <div className="flex items-center justify-center py-4 cursor-pointer" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
                     {isSidebarCollapsed ? (
                         <PanelRightClose size={24} />
@@ -20,7 +26,7 @@ const Sidebar = () => {
                         <img src="/assets/Logo.png" alt="Logo" />
                     )}
                 </div>
-                <nav className="py-4">
+                <nav className="py-4 flex-1">
                     <ul className="space-y-2 text-md">
                         <NavLink to="/"  className={({ isActive }) => 
                             `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
@@ -104,6 +110,14 @@ const Sidebar = () => {
                         }
                     </ul>
                 </nav>
+                <div className="flex items-center justify-center p-4">
+                    <div className={`flex items-center gap-2 justify-center bg-[#FFFFFF70] rounded-full text-black p-3 ${syncing ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                        onClick={() => handleSync()}
+                    >
+                        <GoSync />
+                        {!isSidebarCollapsed && 'Sync'}
+                    </div>
+                </div>
             </aside>
         </div>
     )

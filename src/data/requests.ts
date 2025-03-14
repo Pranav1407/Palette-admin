@@ -113,3 +113,13 @@ export const addAdmin = async (adminData: AddAdminProps): Promise<AddAdminRespon
         throw error;
     }
 }
+
+export const backupData = async (): Promise<any> => {
+    try {
+        const response = await axiosInstance.post(`${API_URL}/backup`);
+        return response.data;
+    } catch (error) {
+        console.error('Error backing up data:', error);
+        throw error;
+    }
+}

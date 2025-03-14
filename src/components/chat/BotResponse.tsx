@@ -462,7 +462,7 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                     /> */}
                 </div>
                 
-                <div className="w-full max-h-96 overflow-x-auto overflow-y-auto 
+                <div className="w-full max-h-96 overflow-x-auto overflow-y-auto border rounded-lg relative
                     [&::-webkit-scrollbar]:w-2
                     [&::-webkit-scrollbar]:h-2
                     [&::-webkit-scrollbar-track]:rounded-lg
@@ -471,15 +471,17 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                     [&::-webkit-scrollbar-thumb]:bg-gray-300
                     [&::-webkit-scrollbar-thumb]:hover:bg-gray-400"
                 >
-                    <table className="max-w-full table-fixed">
-                        <thead className='rounded-lg'>
+                    <table className="max-w-full table-fixed relative">
+                        <thead className="rounded-lg sticky top-0 z-20">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id} className='bg-sidebar-15'>
                                     {headerGroup.headers.map((header,index) => (
                                         <th 
                                             key={header.id} 
                                             className={`p-4 text-center font-normal text-black whitespace-nowrap ${
-                                                index === 0 ? 'rounded-l-lg w-[10px] min-w-[10px]' : 'min-w-[150px]'
+                                                index === 0 ? 'rounded-l-lg w-[10px] min-w-[10px] sticky left-0 z-10 bg-sidebar-15' : 
+                                                index === 1 ? 'min-w-[150px] sticky left-[82px] z-10 bg-sidebar-15' :
+                                                'min-w-[150px]'
                                             } ${
                                                 index === headerGroup.headers.length - 1 ? 'rounded-r-lg' : ''
                                             }`}
@@ -500,10 +502,12 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                                         <td 
                                             key={cell.id} 
                                             className={`border-b bg-white p-4 text-center text-[#818181] whitespace-nowrap ${
-                                                    index === 0 ? 'rounded-l-lg w-[10px] min-w-[10px]' : 'min-w-[150px]'
-                                                } ${
-                                                    index === row.getVisibleCells().length - 1 ? 'rounded-r-lg' : ''
-                                                } ${cell.column.columnDef.id === 'district' ? 'text-black' : ''}
+                                                index === 0 ? 'rounded-l-lg w-[10px] min-w-[10px] sticky left-0 z-10 bg-white' : 
+                                                index === 1 ? 'min-w-[150px] sticky left-[82px] z-10 bg-white' :
+                                                'min-w-[150px]'
+                                            } ${
+                                                index === row.getVisibleCells().length - 1 ? 'rounded-r-lg' : ''
+                                            } ${cell.column.columnDef.id === 'district' ? 'text-black' : ''}
                                             `}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -514,6 +518,7 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         </tbody>
                     </table>
                 </div>
+
             </div>
         )
     }
