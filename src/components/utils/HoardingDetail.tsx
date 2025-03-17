@@ -172,7 +172,7 @@ const HoardingDetail = () => {
                         alt={"Hoarding image"}
                         className="w-16 h-16 object-cover rounded"
                     />
-                    <h2 className="text-lg font-semibold">{hoardingData["Location/Route"]}</h2>
+                    <h2 className="text-lg font-semibold">{hoardingData.Hoarding_Code}, {hoardingData["Location/Route"]}</h2>
                 </div>
                 
                 <div className="flex items-center gap-8">

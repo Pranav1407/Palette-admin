@@ -67,6 +67,7 @@ export interface RequestData {
 
 export interface HoardingData {
     Hoarding_ID: number;
+    Hoarding_Code: string;
     District: string;
     "Location/Route": string;
     "Direction/Route": string;

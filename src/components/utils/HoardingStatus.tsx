@@ -172,7 +172,7 @@ type HoardingStatusProps = {
                   className="w-16 h-16 object-cover rounded mr-4"
                 />
                 <div className="w-[25%] min-w-[200px]">
-                  <h3 className="font-medium truncate">{hoarding.hoarding_details["Location/Route"]}</h3>
+                  <h3 className="font-medium truncate">{hoarding.hoarding_details.Hoarding_Code}, {hoarding.hoarding_details["Location/Route"]}</h3>
                 </div>
                 <div className="w-[30%] min-w-[250px] flex items-center text-[#818181]">
                   <RiAttachment2 className="inline-block mr-1 size-5 flex-shrink-0" />
