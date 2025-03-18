@@ -20,6 +20,8 @@ interface TableContent {
 
 const BotResponse = ({ content }: { content: string | TableContent }) => {
 
+    // give me all the free hoardings in kollam, with disount of 50% for the 1, 3,12, 6 month price
+
     const [downloadOptions, setDownloadOptions] = useState<DownloadOption[]>([
         { 
             id: 'ppt', 
@@ -56,6 +58,7 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
         }
     ])
     
+    console.log("content", content);
 
     if (typeof content === 'object') {
 
@@ -84,353 +87,436 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                 location: content.location_coordinates?.[index] || '-',
                 available: content.available?.[index] ? 'Yes' : '-',
                 lat: content.lat?.[index] || '-',
-                long: content.long?.[index] || '-'
+                long: content.long?.[index] || '-',
+                discount_rate_1_month: content.discount_rate_sqft_1_months?.[index] || '-',
+                discount_rate_3_months: content.discount_rate_sqft_3_months?.[index] || '-',
+                discount_rate_6_months: content.discount_rate_sqft_6_months?.[index] || '-',
+                discount_rate_12_months: content.discount_rate_sqft_12_months?.[index] || '-',
             }))
         },[content]);
                
 
         const columnHelper = createColumnHelper<any>();
 
-        const columns = useMemo(() => [
-            columnHelper.display({
-                id: 'select',
-                header: ({ table }) => (
-                    <div className="w-[50px]">
-                        <input
-                            type="checkbox"
-                            checked={table.getIsAllRowsSelected()}
-                            onChange={table.getToggleAllRowsSelectedHandler()}
-                            className="w-4 h-4"
-                        />
-                    </div>
-                ),
-                cell: ({ row }) => (
-                    <div className="w-[50px] relative cursor-pointer" onClick={row.getToggleSelectedHandler()}>
-                        <img src='/assets/hoarding.svg' alt='hoarding' />
-                        {row.getIsSelected() && (
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-md">
-                                <svg 
-                                    width="24" 
-                                    height="24" 
-                                    viewBox="0 0 24 24" 
-                                    fill="none" 
-                                    stroke="white" 
-                                    strokeWidth="2" 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                            </div>
-                        )}
-                    </div>
-                )
-            }),
-            columnHelper.accessor('hoarding_id', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Hoarding ID
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
+        const columns = useMemo(() => {
+            const baseColumns = [
+                columnHelper.display({
+                    id: 'select',
+                    header: ({ table }) => (
+                        <div className="w-[50px]">
+                            <input
+                                type="checkbox"
+                                checked={table.getIsAllRowsSelected()}
+                                onChange={table.getToggleAllRowsSelectedHandler()}
+                                className="w-4 h-4"
+                            />
+                        </div>
+                    ),
+                    cell: ({ row }) => (
+                        <div className="w-[50px] relative cursor-pointer" onClick={row.getToggleSelectedHandler()}>
+                            <img src='/assets/hoarding.svg' alt='hoarding' />
+                            {row.getIsSelected() && (
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-md">
+                                    <svg 
+                                        width="24" 
+                                        height="24" 
+                                        viewBox="0 0 24 24" 
+                                        fill="none" 
+                                        stroke="white" 
+                                        strokeWidth="2" 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                </div>
+                            )}
+                        </div>
                     )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('district', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            District
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('location_route', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Location
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('direction_route', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Direction
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('width', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Width
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('height', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Height
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('area', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Area
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('type', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Type
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('rate_1_month', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            1 Month Rate
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('rate_3_months', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            3 Months Rate
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('rate_6_months', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            6 Months Rate
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('rate_12_months', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            12 Months Rate
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('floor', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Floor
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('hoarding_code', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Hoarding Code
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('status', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Status
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('available', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Available
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('location', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Location Coordinates
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('lat', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Latitude
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            }),
-            columnHelper.accessor('long', {
-                header: ({ column }) => {
-                    return (
-                        <p
-                            onClick={() => column.toggleSorting()}
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                            Longitude
-                            {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                            {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                        </p>
-                    )
-                },
-                sortingFn: 'alphanumeric',
-                filterFn: 'includesString'
-            })
-        ], []);
+                }),
+                columnHelper.accessor('hoarding_id', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Hoarding ID
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('district', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                District
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('location_route', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Location
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('direction_route', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Direction
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('width', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Width
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('height', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Height
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('area', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Area
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('type', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Type
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('rate_1_month', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                1 Month Rate
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('rate_3_months', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                3 Months Rate
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('rate_6_months', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                6 Months Rate
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('rate_12_months', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                12 Months Rate
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('floor', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Floor
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('hoarding_code', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Hoarding Code
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('status', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Status
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('available', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Available
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('location', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Location Coordinates
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('lat', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Latitude
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                }),
+                columnHelper.accessor('long', {
+                    header: ({ column }) => {
+                        return (
+                            <p
+                                onClick={() => column.toggleSorting()}
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                                Longitude
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        )
+                    },
+                    sortingFn: 'alphanumeric',
+                    filterFn: 'includesString'
+                })
+            ]
+
+            if (content.discount_rate_sqft_1_months?.length > 0) {
+                baseColumns.push(
+                    columnHelper.accessor('discount_rate_1_month', {
+                        header: ({ column }) => (
+                            <p onClick={() => column.toggleSorting()} 
+                               className="flex items-center justify-center gap-1 cursor-pointer">
+                                1 Month Discount Rate
+                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                            </p>
+                        ),
+                        sortingFn: 'alphanumeric',
+                        filterFn: 'includesString'
+                    })
+                );
+            }
+
+            if (content.discount_rate_sqft_3_months?.length > 0) {
+                baseColumns.push(
+                    columnHelper.accessor('discount_rate_3_months', {
+                        header: ({ column }) => {
+                            return (
+                                <p onClick={() => column.toggleSorting()} 
+                                className="flex items-center justify-center gap-1 cursor-pointer">
+                                    3 Months Discount Rate
+                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                                </p>
+                            )
+                        },
+                        sortingFn: 'alphanumeric',
+                        filterFn: 'includesString'
+                    }),
+                );
+            }
+
+            if (content.discount_rate_sqft_6_months?.length > 0) {
+                baseColumns.push(
+                    columnHelper.accessor('discount_rate_6_months', {
+                        header: ({ column }) => {
+                            return (
+                                <p onClick={() => column.toggleSorting()} 
+                                className="flex items-center justify-center gap-1 cursor-pointer">
+                                    6 Months Discount Rate
+                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                                </p>
+                            )
+                        },
+                        sortingFn: 'alphanumeric',
+                        filterFn: 'includesString'
+                    }),
+                );
+            }
+
+            if (content.discount_rate_sqft_12_months?.length > 0) {
+                baseColumns.push(
+                    columnHelper.accessor('discount_rate_12_months', {
+                        header: ({ column }) => {
+                            return (
+                                <p onClick={() => column.toggleSorting()} 
+                                className="flex items-center justify-center gap-1 cursor-pointer">
+                                    12 Months Discount Rate
+                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                                </p>
+                            )
+                        },
+                        sortingFn: 'alphanumeric',
+                        filterFn: 'includesString'
+                    }),
+                );
+            }
+
+            return baseColumns;
+            
+        }, [content]);
 
         const table = useReactTable({
             data: tableData,

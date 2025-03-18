@@ -105,7 +105,7 @@ const Chat = () => {
                 name="query"
                 type="text"
                 placeholder="Ask me anything..."
-                className="w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
+                className="w-full px-4 py-4 pr-20 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none"
               />
               <button type="submit" className="absolute right-0 top-0 bg-sidebar text-white px-5 py-5 rounded-tr-xl rounded-br-xl">
                 <SendHorizontal className="w-5 h-5" />
@@ -175,7 +175,7 @@ const Chat = () => {
                   type="text"
                   placeholder="Ask me anything..."
                   disabled={chatMutation.isPending}
-                  className={`w-full px-4 py-4 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none ${chatMutation.isPending ? 'bg-gray-100' : ''}`}
+                  className={`w-full px-4 py-4 pr-20 rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal outline-none ${chatMutation.isPending ? 'bg-gray-100' : ''}`}
                 />
                 <button 
                   type="submit" 
