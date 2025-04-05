@@ -80,6 +80,8 @@ export interface HoardingData {
     "Rate/Sqft 6 M": number;
     "Rate/Sqft 12 M": number;
     Floor: string;
+    "Start Date": string;
+    "End Date": string
 }
 
 export interface MediaData {
@@ -115,6 +117,8 @@ export interface RequestActionParams {
     request_id: number | undefined;
     user_id: number | null;
     comment: string;
+    start_date: string;
+    end_date: string;
 }
 
 export interface RequestActionResponse {

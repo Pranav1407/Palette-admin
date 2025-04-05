@@ -66,7 +66,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
 
 export const requestAction = async (actionParams: RequestActionParams): Promise<RequestActionResponse> => {
     try {
-        const response = await axiosInstance.post(`${API_URL}/request/action?action=${actionParams.action}&request_id=${actionParams.request_id}&user_id=${actionParams.user_id}&comment=${actionParams.comment}`);
+        const response = await axiosInstance.post(`${API_URL}/request/action?action=${actionParams.action}&request_id=${actionParams.request_id}&user_id=${actionParams.user_id}&comment=${actionParams.comment}&start_date=${actionParams.start_date}&end_date=${actionParams.end_date}`);
         return response.data;
     } catch (error) {
         console.error('Error requesting action:', error);

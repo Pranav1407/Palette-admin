@@ -71,7 +71,7 @@ export function LoginPage() {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          <span className="text-lg m-2 ml-4 text-sidebar">Forgot password ?</span>
+          {/* <span className="text-lg m-2 ml-4 text-sidebar">Forgot password ?</span> */}
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <Button
             variant='default'

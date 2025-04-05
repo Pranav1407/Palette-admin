@@ -2,12 +2,16 @@ import {useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { ImageDialog } from "@/components/utils/ImageDialog"
-import { CheckCircle, AlertCircle, MoveLeft } from "lucide-react"
+import { CheckCircle, AlertCircle, MoveLeft, Minus, CalendarIcon } from "lucide-react"
 import { fetchRequest, requestAction } from "@/data/requests"
 import { HoardingData, RequestData } from "@/types/Types"
 import { useAuthStore } from "@/stores/authStore"
 import toast from "react-hot-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 
 const HoardingDetail = () => {
@@ -19,7 +23,6 @@ const HoardingDetail = () => {
     const [rejectionReason, setRejectionReason] = useState("")
     const { userId } = useAuthStore()
     const navigate = useNavigate();
-
     const [data, setData] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isError, setIsError] = useState(false)
@@ -28,8 +31,8 @@ const HoardingDetail = () => {
     const [geoMapLoading, setGeoMapLoading] = useState(true);
     const [imagesLoading, setImagesLoading] = useState(true);
     const [showApproveModal, setShowApproveModal] = useState(false)
-
-    // const [videoLoading, setVideoLoading] = useState(true);
+    const [fromDate, setFromDate] = useState<Date>()
+    const [toDate, setToDate] = useState<Date>()
     
     useEffect(() => {
         const loadData = async () => {
@@ -131,22 +134,37 @@ const HoardingDetail = () => {
 
     const handleAction = async (action: string, comment: string) => {
         setIsRejectLoading(true);
+        
+        const formattedFromDate = fromDate ? format(fromDate, "yyyy-MM-dd") : "";
+        const formattedToDate = toDate ? format(toDate, "yyyy-MM-dd") : "";
+
         const actionParams = {
             action: action,
             request_id: Number(id),
             user_id: userId,
             comment: comment,
+            start_date: formattedFromDate,
+            end_date: formattedToDate,
         }
         const response = await requestAction(actionParams);
         if(response.message === `Request updated successfully with ${action} action.`) {
             setIsRejectLoading(false);
+            setShowApproveModal(false);
+            setFromDate(undefined);
+            setToDate(undefined);
             toast.success("Request updated successfully", { 
                 position: 'top-right',
-             })
+            })
             navigate(`/${action}`)
         }
         else {
             setIsRejectLoading(false);
+            setShowApproveModal(false);
+            setFromDate(undefined);
+            setToDate(undefined);
+            toast.error("Request update failed", { 
+                position: 'top-right',
+            })
             console.error("Error updating request:", response.message)
         }
     }
@@ -161,7 +179,6 @@ const HoardingDetail = () => {
             year: 'numeric'
         }).replace(/(\d+)/, `$1${suffix}`);
     }
-    
 
     return (
         <div className="space-y-4 p-2">
@@ -315,6 +332,11 @@ const HoardingDetail = () => {
                                 <div className="flex flex-col text-[#818181] text-center text-2xl">
                                     <p>{`Job approved at ${new Date(requestData.updated_at).toLocaleTimeString()},`}</p>
                                     <p>{formatDate(requestData.updated_at)}</p>
+                                    {hoardingData["Start Date"] && (
+                                        <p className="flex items-center gap-4 mt-3">
+                                            {formatDate(hoardingData["Start Date"])} <Minus /> {formatDate(hoardingData["End Date"])}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -330,13 +352,79 @@ const HoardingDetail = () => {
                 </div>
                 {showApproveModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-[500px]">
                             <h3 className="text-xl font-semibold mb-4 text-center">Confirm Approval</h3>
                             <p className="text-gray-600 mb-6 text-center">Are you sure you want to approve?</p>
+                            
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-sm font-medium">From</label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-[200px] justify-start text-left font-normal border-2 border-gray-200",
+                                                    !fromDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {fromDate ? format(fromDate, "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start" side="right" sideOffset={5}>
+                                            <Calendar
+                                                mode="single"
+                                                selected={fromDate}
+                                                onSelect={setFromDate}
+                                                disabled={(date) => date < new Date()}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                
+                                <Minus className="mt-8" />
+                                
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-sm font-medium">To</label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                disabled={!fromDate}
+                                                className={cn(
+                                                    "w-[200px] justify-start text-left font-normal border-2 border-gray-200",
+                                                    !toDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {toDate ? format(toDate, "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start" side="right" sideOffset={5}>
+                                            <Calendar
+                                                mode="single"
+                                                selected={toDate}
+                                                onSelect={setToDate}
+                                                disabled={(date) => date < (fromDate || new Date())}
+                                                initialFocus
+                                                defaultMonth={fromDate}
+                                                fromDate={fromDate}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+
                             <div className="flex justify-center gap-4">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setShowApproveModal(false)}
+                                    onClick={() => {
+                                        setShowApproveModal(false);
+                                        setFromDate(undefined);
+                                        setToDate(undefined);
+                                    }}
                                     className="border-gray-300"
                                 >
                                     Cancel
@@ -344,12 +432,12 @@ const HoardingDetail = () => {
                                 <Button
                                     variant="default"
                                     className="bg-[#4BB543]"
+                                    disabled={!fromDate || !toDate}
                                     onClick={() => {
                                         handleAction("approved", "");
-                                        setShowApproveModal(false);
                                     }}
                                 >
-                                    Approve
+                                    {isRejectLoading ? 'Approving...' : 'Approve'}
                                 </Button>
                             </div>
                         </div>
