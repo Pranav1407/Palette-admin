@@ -19,9 +19,6 @@ interface TableContent {
 }
 
 const BotResponse = ({ content }: { content: string | TableContent }) => {
-
-    // give me all the free hoardings in kollam, with disount of 50% for the 1, 3,12, 6 month price
-
     const [downloadOptions, setDownloadOptions] = useState<DownloadOption[]>([
         { 
             id: 'ppt', 
@@ -51,54 +48,39 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     // const [filterOpen, setFilterOpen] = useState(false)
-    const [sorting, setSorting] = useState<SortingState>([
-        {
-            id: 'hoarding_id',
-            desc: false
-        }
-    ])
+    const [sorting, setSorting] = useState<SortingState>([])
     
     console.log("content", content);
 
     if (typeof content === 'object') {
-
+        // Create table data directly from the content
         const tableData = useMemo(() => {
-            // Find first non-empty array to use as mapping reference
-            const mappingKey = Object.entries(content).find(([_, value]) => 
-                Array.isArray(value) && value.length > 0
-            )?.[0] || Object.keys(content)[0];
-        
-            return content[mappingKey].map((_, index) => ({
-                district: content.district?.[index] || '-',
-                location_route: content.location?.[index] || '-',
-                direction_route: content.direction_route?.[index] || '-',
-                width: content.width?.[index] || '-',
-                height: content.height?.[index] || '-',
-                area: content.area?.[index] || '-',
-                type: content.type?.[index] || '-',
-                rate_1_month: content.rate_sqft_1_months?.[index] || '-',
-                rate_3_months: content.rate_sqft_3_months?.[index] || '-',
-                rate_6_months: content.rate_sqft_6_months?.[index] || '-',
-                rate_12_months: content.rate_sqft_12_months?.[index] || '-',
-                floor: content.floor?.[index] || '-',
-                hoarding_id: content.hoarding_id?.[index] || '-',
-                hoarding_code: content.hoarding_code?.[index] || '-',
-                status: content.status?.[index] || '-',
-                location: content.location_coordinates?.[index] || '-',
-                available: content.available?.[index] ? 'Yes' : '-',
-                lat: content.lat?.[index] || '-',
-                long: content.long?.[index] || '-',
-                discount_rate_1_month: content.discount_rate_sqft_1_months?.[index] || '-',
-                discount_rate_3_months: content.discount_rate_sqft_3_months?.[index] || '-',
-                discount_rate_6_months: content.discount_rate_sqft_6_months?.[index] || '-',
-                discount_rate_12_months: content.discount_rate_sqft_12_months?.[index] || '-',
-            }))
-        },[content]);
-               
+            // Find the length of the arrays in content
+            const arrayLength = Math.max(...Object.values(content).map(arr => Array.isArray(arr) ? arr.length : 0));
+            
+            // Create an array of objects where each object represents a row
+            const data = [];
+            for (let i = 0; i < arrayLength; i++) {
+                const row: Record<string, any> = {};
+                Object.entries(content).forEach(([key, values]) => {
+                    if (Array.isArray(values) && values.length > i) {
+                        row[key] = values[i];
+                    } else {
+                        row[key] = '-';
+                    }
+                });
+                data.push(row);
+            }
+            return data;
+        }, [content]);
 
+        // Create columns directly from the content keys
         const columnHelper = createColumnHelper<any>();
-
+        
         const columns = useMemo(() => {
+            const keys = Object.keys(content);
+            
+            // Start with select column
             const baseColumns = [
                 columnHelper.display({
                     id: 'select',
@@ -134,388 +116,37 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         </div>
                     )
                 }),
-                columnHelper.accessor('hoarding_id', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Hoarding ID
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('district', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                District
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('location_route', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Location
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('direction_route', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Direction
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('width', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Width
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('height', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Height
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('area', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Area
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('type', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Type
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('rate_1_month', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                1 Month Rate
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('rate_3_months', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                3 Months Rate
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('rate_6_months', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                6 Months Rate
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('rate_12_months', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                12 Months Rate
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('floor', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Floor
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('hoarding_code', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Hoarding Code
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('status', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Status
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('available', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Available
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('location', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Location Coordinates
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('lat', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Latitude
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                }),
-                columnHelper.accessor('long', {
-                    header: ({ column }) => {
-                        return (
-                            <p
-                                onClick={() => column.toggleSorting()}
-                                className="flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                                Longitude
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        )
-                    },
-                    sortingFn: 'alphanumeric',
-                    filterFn: 'includesString'
-                })
-            ]
-
-            if (content.discount_rate_sqft_1_months?.length > 0) {
+            ];
+            
+            keys.forEach(key => {
                 baseColumns.push(
-                    columnHelper.accessor('discount_rate_1_month', {
-                        header: ({ column }) => (
-                            <p onClick={() => column.toggleSorting()} 
-                               className="flex items-center justify-center gap-1 cursor-pointer">
-                                1 Month Discount Rate
-                                {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                            </p>
-                        ),
+                    columnHelper.accessor((row: any) => row[key], {
+                        id: key,
+                        header: ({ column }) => {
+                            return (
+                                <p
+                                    onClick={() => column.toggleSorting()}
+                                    className="flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                    {key.replace(/_/g, ' ').split(' ').map(word => 
+                                        word.charAt(0).toUpperCase() + word.slice(1)
+                                    ).join(' ')}
+                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
+                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
+                                </p>
+                            )
+                        },
+                        cell: ({ getValue }) => {
+                            const value = getValue();
+                            return value === null || value === undefined ? '-' : value === true ? 'Yes' : value === false ? 'No' : value;
+                        },
                         sortingFn: 'alphanumeric',
                         filterFn: 'includesString'
                     })
                 );
-            }
-
-            if (content.discount_rate_sqft_3_months?.length > 0) {
-                baseColumns.push(
-                    columnHelper.accessor('discount_rate_3_months', {
-                        header: ({ column }) => {
-                            return (
-                                <p onClick={() => column.toggleSorting()} 
-                                className="flex items-center justify-center gap-1 cursor-pointer">
-                                    3 Months Discount Rate
-                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                                </p>
-                            )
-                        },
-                        sortingFn: 'alphanumeric',
-                        filterFn: 'includesString'
-                    }),
-                );
-            }
-
-            if (content.discount_rate_sqft_6_months?.length > 0) {
-                baseColumns.push(
-                    columnHelper.accessor('discount_rate_6_months', {
-                        header: ({ column }) => {
-                            return (
-                                <p onClick={() => column.toggleSorting()} 
-                                className="flex items-center justify-center gap-1 cursor-pointer">
-                                    6 Months Discount Rate
-                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                                </p>
-                            )
-                        },
-                        sortingFn: 'alphanumeric',
-                        filterFn: 'includesString'
-                    }),
-                );
-            }
-
-            if (content.discount_rate_sqft_12_months?.length > 0) {
-                baseColumns.push(
-                    columnHelper.accessor('discount_rate_12_months', {
-                        header: ({ column }) => {
-                            return (
-                                <p onClick={() => column.toggleSorting()} 
-                                className="flex items-center justify-center gap-1 cursor-pointer">
-                                    12 Months Discount Rate
-                                    {column.getIsSorted() === 'asc' && <ChevronUp className="h-4 w-4" />}
-                                    {column.getIsSorted() === 'desc' && <ChevronDown className="h-4 w-4" />}
-                                </p>
-                            )
-                        },
-                        sortingFn: 'alphanumeric',
-                        filterFn: 'includesString'
-                    }),
-                );
-            }
-
-            return baseColumns;
+            });
             
+            return baseColumns;
         }, [content]);
 
         const table = useReactTable({
@@ -541,11 +172,6 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         setDownloadOptions={setDownloadOptions}
                         table={table}
                     />
-                    {/* <FilterButton 
-                        filterOpen={filterOpen}
-                        setFilterOpen={setFilterOpen}
-                        table={table}
-                    /> */}
                 </div>
                 
                 <div className="w-full max-h-96 overflow-x-auto overflow-y-auto border rounded-lg relative
@@ -593,8 +219,7 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                                                 'min-w-[150px]'
                                             } ${
                                                 index === row.getVisibleCells().length - 1 ? 'rounded-r-lg' : ''
-                                            } ${cell.column.columnDef.id === 'district' ? 'text-black' : ''}
-                                            `}
+                                            }`}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
@@ -604,11 +229,9 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         </tbody>
                     </table>
                 </div>
-
             </div>
         )
     }
-
     return <p className="p-3 rounded-lg border">{content}</p>
 }
 
