@@ -53,6 +53,9 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
     console.log("content", content);
 
     if (typeof content === 'object') {
+        // Store original data for download
+        const originalData = useMemo(() => content, [content]);
+
         // Create table data directly from the content
         const tableData = useMemo(() => {
             // Find the length of the arrays in content
@@ -69,6 +72,8 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         row[key] = '-';
                     }
                 });
+                // Add original index to track which row this is
+                row._originalIndex = i;
                 data.push(row);
             }
             return data;
@@ -171,6 +176,7 @@ const BotResponse = ({ content }: { content: string | TableContent }) => {
                         downloadOptions={downloadOptions}
                         setDownloadOptions={setDownloadOptions}
                         table={table}
+                        originalData={originalData}
                     />
                 </div>
                 

@@ -35,7 +35,7 @@ const Layout = () => {
   return (
     <div className="flex h-screen">
       <Sidebar handleSync={handleSync} syncing={syncing} />
-      <main className="py-4 pr-4 h-full w-full">
+      <main className="py-4 pr-4 h-full w-full overflow-hidden">
         <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <Outlet context={{ searchQuery }} />
         <Toaster />

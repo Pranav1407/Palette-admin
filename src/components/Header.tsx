@@ -35,6 +35,8 @@ const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
                 return 'Email Remainder';
             case '/add-admin':
                 return 'Add Admin';
+            case '/dbupdate':
+                return 'Database';
             default:
                 if (path.startsWith('/hoarding/')) {
                     return 'Hoarding Detail';

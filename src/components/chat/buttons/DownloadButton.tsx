@@ -14,14 +14,21 @@ interface DownloadOption {
     icon: React.ReactNode;
 }
 
+interface TableContent {
+    [key: string]: (string | number | boolean)[];
+}
+
 interface DownloadButtonProps {
     downloadOptions: DownloadOption[];
     setDownloadOptions: React.Dispatch<React.SetStateAction<DownloadOption[]>>;
     table: any;
+    originalData: TableContent;
 }
 
+export const DownloadButton = ({ downloadOptions, setDownloadOptions, table, originalData }: DownloadButtonProps) => {
 
-export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: DownloadButtonProps) => {
+    console.log("table", table);
+    console.log("originalData", originalData);
 
     const [downloading, setDownloading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -31,12 +38,20 @@ export const DownloadButton = ({ downloadOptions, setDownloadOptions, table }: D
         const selectedFormats = downloadOptions
         .filter(opt => opt.selected)
         .map(opt => opt.id.toUpperCase());
-        //@ts-expect-error - selectedRows is not defined
-        const selectedRows = table.getSelectedRowModel().rows.map(row => row.original);
+
+        const selectedRows = table.getSelectedRowModel().rows.map((row:any) => row.original);
+        const selectedRowIndices = selectedRows.map((row: any) => row._originalIndex);
     
+        const filteredOriginalData: TableContent = {};
+        Object.keys(originalData).forEach(key => {
+            if (Array.isArray(originalData[key])) {
+                filteredOriginalData[key] = selectedRowIndices.map((index: any) => originalData[key][index]);
+            }
+        });
+
         const downloadData = {
             formats: selectedFormats,
-            response: selectedRows
+            response: filteredOriginalData
         };
 
         if(selectedFormats.length === 0) {

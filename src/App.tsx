@@ -11,6 +11,7 @@ import { useAuthStore } from './stores/authStore'
 import Chat from './components/chat/Chat'
 import EmailRemainder from './components/email-remainder/EmailRemainder'
 import AddAdmin from './components/add-admin/AddAdmin'
+import DBUpdate from './components/Database/DBUpdate'
 
 const App = () => {
   const userId = useAuthStore((state) => state.userId)
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/hoarding/:id" element={<HoardingDetail />} />
         <Route path="/email-remainder" element={<EmailRemainder />} />
         <Route path="/add-admin" element={<AddAdmin />} />
+        <Route path="/dbupdate" element={<DBUpdate />} />
       </Route>
     </Routes>
   )
