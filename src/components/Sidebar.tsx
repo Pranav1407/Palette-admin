@@ -5,7 +5,7 @@ import { MessageSquare, PanelRightClose } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { GoSync } from "react-icons/go";
-// import { FaDatabase } from "react-icons/fa6";
+import { FaDatabase } from "react-icons/fa6";
 
 interface SidebarProps {
     handleSync: () => void;
@@ -110,7 +110,7 @@ const Sidebar = ({handleSync, syncing}: SidebarProps) => {
                             </NavLink>
                         }
 
-                        {/* <NavLink to="/dbupdate" 
+                        <NavLink to="/dbupdate" 
                             className={({ isActive }) => 
                                 `flex ${isSidebarCollapsed ? 'justify-center py-1' : 'gap-3 pl-2 py-2'} cursor-pointer ${
                                     isActive ? 'bg-white text-secondary rounded-lg' : ''
@@ -118,7 +118,7 @@ const Sidebar = ({handleSync, syncing}: SidebarProps) => {
                         >
                             <FaDatabase size={25} />
                             {!isSidebarCollapsed && <span>Database</span>}
-                        </NavLink> */}
+                        </NavLink>
 
                     </ul>
                 </nav>

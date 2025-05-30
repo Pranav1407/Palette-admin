@@ -8,7 +8,10 @@ import {
     RequestActionResponse, 
     SubmitQueryResponse, 
     AddAdminProps,
-    AddAdminResponse 
+    AddAdminResponse, 
+    GetDBDataResponse,
+    DBUpdateResponse,
+    DBUpdateRequest
 } from '@/types/Types';
 
 import axios from 'axios';
@@ -117,6 +120,27 @@ export const addAdmin = async (adminData: AddAdminProps): Promise<AddAdminRespon
 export const backupData = async (): Promise<any> => {
     try {
         const response = await axiosInstance.post(`${API_URL}/backup`);
+        return response.data;
+    } catch (error) {
+        console.error('Error backing up data:', error);
+        throw error;
+    }
+}
+
+export const getDBData = async (): Promise<GetDBDataResponse> => {
+    try {
+        const response = await axiosInstance.post(`${API_URL}/database/db_get`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching DB data:', error);
+        throw error;
+    }
+};
+
+
+export const updateDBData = async (changes: DBUpdateRequest[]): Promise<DBUpdateResponse> => {
+    try {
+        const response = await axiosInstance.put(`${API_URL}/database/db_update`, changes);
         return response.data;
     } catch (error) {
         console.error('Error backing up data:', error);

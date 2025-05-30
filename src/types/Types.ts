@@ -194,3 +194,42 @@ export interface AddAdminResponse {
     message: string,
     payload: Object
 }
+
+export interface DBHoardingData {
+    district: string;
+    location_route: string;
+    direction_route: string;
+    width: number;
+    height: number;
+    area: number;
+    type: string;
+    rate_sqft_1_months: number;
+    rate_sqft_3_months: number;
+    rate_sqft_6_months: number;
+    rate_sqft_12_months: number;
+    floor: string;
+    hoarding_id: number;
+    hoarding_code: string;
+    status: string;
+    location: string;
+    available: boolean;
+    lat: number;
+    long: number;
+}
+
+export interface GetDBDataResponse {
+    message: string;
+    payload: {
+        data_list_dict: DBHoardingData[];
+    }
+}
+
+export interface DBUpdateRequest {
+  hoarding_id: number;
+  [key: string]: string | number | boolean;
+}
+
+export interface DBUpdateResponse {
+  message: string;
+  payload?: any;
+}

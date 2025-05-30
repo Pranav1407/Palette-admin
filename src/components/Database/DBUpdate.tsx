@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { data } from './Data';
+import React, { useState, useEffect } from 'react';
+import { getDBData, updateDBData } from '@/data/requests';
+import { GetDBDataResponse, DBHoardingData, DBUpdateRequest } from '@/types/Types';
+import toast from 'react-hot-toast';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -8,7 +10,7 @@ interface ConfirmationModalProps {
   oldValue: string | number | boolean;
   newValue: string | number | boolean;
   field: string;
-  index: number;
+  hoardingId: number;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -18,7 +20,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   oldValue,
   newValue,
   field,
-  index
+  hoardingId
 }) => {
   if (!isOpen) return null;
 
@@ -32,7 +34,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </p>
           <div className="bg-gray-50 p-3 rounded">
             <p><strong>Field:</strong> {field}</p>
-            <p><strong>Hoarding ID:</strong> {data["Hoarding Id"][index]}</p>
+            <p><strong>Hoarding ID:</strong> {hoardingId}</p>
             <p><strong>Old Value:</strong> {String(oldValue)}</p>
             <p><strong>New Value:</strong> {String(newValue)}</p>
           </div>
@@ -57,52 +59,92 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 };
 
 const DBUpdate: React.FC = () => {
-  const [tableData, setTableData] = useState(data);
-  const [editingCell, setEditingCell] = useState<{field: string, index: number} | null>(null);
+  const [tableData, setTableData] = useState<DBHoardingData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingCell, setEditingCell] = useState<{field: keyof DBHoardingData, index: number} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [pendingChange, setPendingChange] = useState<{
-    field: string;
+    field: keyof DBHoardingData;
     index: number;
     oldValue: string | number | boolean;
     newValue: string | number | boolean;
   } | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [changedRecords, setChangedRecords] = useState<Map<number, Partial<DBHoardingData>>>(new Map());
 
-  const allFields = Object.keys(tableData);
-  const editableFields = allFields.filter(field => field !== "Hoarding Id");
-  //@ts-expect-error Type 'string | number | boolean' is not assignable to type 'string'.
-  const rowCount = tableData[allFields[0]]?.length || 0;
+  const columns: { key: keyof DBHoardingData; label: string; editable: boolean }[] = [
+    { key: 'hoarding_id', label: 'Hoarding ID', editable: false },
+    { key: 'district', label: 'District', editable: true },
+    { key: 'location_route', label: 'Location/Route', editable: true },
+    { key: 'direction_route', label: 'Direction/Route', editable: true },
+    { key: 'width', label: 'Width', editable: true },
+    { key: 'height', label: 'Height', editable: true },
+    { key: 'area', label: 'Area', editable: true },
+    { key: 'type', label: 'Type', editable: true },
+    { key: 'rate_sqft_1_months', label: 'Rate/Sqft 1M', editable: true },
+    { key: 'rate_sqft_3_months', label: 'Rate/Sqft 3M', editable: true },
+    { key: 'rate_sqft_6_months', label: 'Rate/Sqft 6M', editable: true },
+    { key: 'rate_sqft_12_months', label: 'Rate/Sqft 12M', editable: true },
+    { key: 'floor', label: 'Floor', editable: true },
+    { key: 'hoarding_code', label: 'Hoarding Code', editable: true },
+    { key: 'status', label: 'Status', editable: true },
+    { key: 'available', label: 'Available', editable: true },
+  ];
 
-  const handleCellClick = (field: string, index: number) => {
-    // Don't allow editing of Hoarding Id
-    if (field === "Hoarding Id") return;
+  useEffect(() => {
+    const fetchDB = async () => {
+      try {
+        setLoading(true);
+        const response: GetDBDataResponse = await getDBData();
+        console.log("response", response);
+        setTableData(response.payload.data_list_dict);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDB();
+  }, []);
+
+  const handleCellClick = (field: keyof DBHoardingData, index: number) => {
+    const column = columns.find(col => col.key === field);
+    if (!column?.editable) return;
     
     setEditingCell({ field, index });
-    //@ts-expect-error Type 'string | number | boolean' is not assignable to type 'string'.
-    setEditValue(String(tableData[field][index] || ''));
+    setEditValue(String(tableData[index][field] || ''));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent, field: string, index: number) => {
+  const handleCellEdit = (field: keyof DBHoardingData, index: number) => {
+    const oldValue = tableData[index][field];
+    const newValue = convertValue(editValue, typeof oldValue);
+    
+    if (oldValue !== newValue) {
+      setPendingChange({
+        field,
+        index,
+        oldValue,
+        newValue
+      });
+      setShowModal(true);
+    } else {
+      setEditingCell(null);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, field: keyof DBHoardingData, index: number) => {
     if (e.key === 'Enter') {
-      //@ts-expect-error Type 'string | number | boolean' is not assignable to type 'string'.
-      const oldValue = tableData[field][index];
-      const newValue = convertValue(editValue, typeof oldValue);
-      
-      if (oldValue !== newValue) {
-        setPendingChange({
-          field,
-          index,
-          oldValue,
-          newValue
-        });
-        setShowModal(true);
-      } else {
-        setEditingCell(null);
-      }
+      handleCellEdit(field, index);
     } else if (e.key === 'Escape') {
       setEditingCell(null);
     }
+  };
+
+  const handleBlur = (field: keyof DBHoardingData, index: number) => {
+    handleCellEdit(field, index);
   };
 
   const convertValue = (value: string, originalType: string): string | number | boolean => {
@@ -117,10 +159,24 @@ const DBUpdate: React.FC = () => {
 
   const confirmChange = () => {
     if (pendingChange) {
-      const newData = { ...tableData };
-      //@ts-expect-error Type 'string | number | boolean' is not assignable to type 'string'.
-      newData[pendingChange.field][pendingChange.index] = pendingChange.newValue;
+      const newData = [...tableData];
+      const hoardingId = newData[pendingChange.index].hoarding_id;
+      
+      // Update the table data
+      (newData[pendingChange.index] as any)[pendingChange.field] = pendingChange.newValue;
       setTableData(newData);
+      
+      // Track the change for API call
+      const existingChanges = changedRecords.get(hoardingId) || {};
+      const updatedChanges = {
+        ...existingChanges,
+        [pendingChange.field]: pendingChange.newValue
+      };
+      
+      const newChangedRecords = new Map(changedRecords);
+      newChangedRecords.set(hoardingId, updatedChanges);
+      setChangedRecords(newChangedRecords);
+      
       setHasChanges(true);
     }
     setShowModal(false);
@@ -134,36 +190,74 @@ const DBUpdate: React.FC = () => {
     setEditingCell(null);
   };
 
-  const saveChanges = () => {
-    // Here you would typically send the data to your backend
-    console.log('Saving changes:', tableData);
-    alert('Changes saved successfully!');
-    setHasChanges(false);
+  const saveChanges = async () => {
+    try {
+      setSaving(true);
+    
+      const apiPayload: DBUpdateRequest[] = Array.from(changedRecords.entries()).map(([hoardingId, changes]) => ({
+        hoarding_id: hoardingId,
+        ...changes
+      }));
+
+      const response = await updateDBData(apiPayload);
+      if(response.message === "Database updated successfully") {
+        toast.success('Changes saved successfully!',{
+          position: "top-right",
+          duration: 3000
+        });
+        
+        setChangedRecords(new Map());
+        setHasChanges(false);
+      } else {
+        throw new Error('Failed to update database');
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast.error("Something went wrong, Please try again later", {
+        position: "top-right",
+        duration: 5000
+      })
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const renderCellValue = (field: string, index: number) => {
-    //@ts-expect-error Type 'string | number | boolean' is not assignable to type 'string'.
-    const value = tableData[field][index];
-    if (value === null) return <span className="text-gray-400">null</span>;
+  const renderCellValue = (value: string | number | boolean) => {
+    if (value === null || value === undefined) return <span className="text-gray-400">null</span>;
     if (typeof value === 'boolean') return value ? 'true' : 'false';
     return String(value);
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-lg">Loading database...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Database Update</h1>
-        <button
-          onClick={saveChanges}
-          disabled={!hasChanges}
-          className={`px-4 py-2 rounded font-medium ${
-            hasChanges
-              ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          Save Changes
-        </button>
+        <div className="flex items-center space-x-4">
+          {hasChanges && (
+            <span className="text-sm text-gray-600">
+              {changedRecords.size} record(s) modified
+            </span>
+          )}
+          <button
+            onClick={saveChanges}
+            disabled={!hasChanges || saving}
+            className={`px-4 py-2 rounded font-medium ${
+              hasChanges && !saving
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       <div className="border rounded-lg bg-white overflow-hidden">
@@ -171,46 +265,50 @@ const DBUpdate: React.FC = () => {
           <table>
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r min-w-[120px]">
-                  Hoarding Id
-                </th>
-                {editableFields.map((field) => (
+                {columns.map((column) => (
                   <th
-                    key={field}
+                    key={column.key}
                     className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r min-w-[120px]"
                   >
-                    {field}
+                    {column.label}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-center">
-              {Array.from({ length: rowCount }, (_, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm font-medium text-gray-900 bg-gray-50 border-r min-w-[120px]">
-                    <div className="min-h-[24px] flex items-center justify-center">
-                      {tableData["Hoarding Id"][index]}
-                    </div>
-                  </td>
-                  {editableFields.map((field) => (
+              {tableData.map((row, index) => (
+                <tr 
+                  key={row.hoarding_id} 
+                  className={`hover:bg-gray-50 ${
+                    changedRecords.has(row.hoarding_id) ? 'bg-yellow-50' : ''
+                  }`}
+                >
+                  {columns.map((column) => (
                     <td
-                      key={`${field}-${index}`}
-                      className="px-4 py-3 text-sm text-gray-900 cursor-pointer hover:bg-blue-50 border-r min-w-[120px]"
-                      onClick={() => handleCellClick(field, index)}
+                      key={`${column.key}-${index}`}
+                      className={`px-4 py-3 text-sm text-gray-900 border-r min-w-[120px] ${
+                        column.editable ? 'cursor-pointer hover:bg-blue-50' : 'bg-gray-50'
+                      } ${
+                        changedRecords.has(row.hoarding_id) && 
+                        changedRecords.get(row.hoarding_id)?.[column.key] !== undefined
+                          ? 'bg-yellow-100 border-yellow-300'
+                          : ''
+                      }`}
+                      onClick={() => handleCellClick(column.key, index)}
                     >
-                      {editingCell?.field === field && editingCell?.index === index ? (
+                      {editingCell?.field === column.key && editingCell?.index === index ? (
                         <input
                           type="text"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => handleKeyPress(e, field, index)}
-                          onBlur={() => setEditingCell(null)}
+                          onKeyDown={(e) => handleKeyPress(e, column.key, index)}
+                          onBlur={() => handleBlur(column.key, index)}
                           className="w-full px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           autoFocus
                         />
                       ) : (
                         <div className="min-h-[24px] flex items-center justify-center">
-                          {renderCellValue(field, index)}
+                          {renderCellValue(row[column.key])}
                         </div>
                       )}
                     </td>
@@ -228,8 +326,8 @@ const DBUpdate: React.FC = () => {
         onCancel={cancelChange}
         oldValue={pendingChange?.oldValue || ''}
         newValue={pendingChange?.newValue || ''}
-        field={pendingChange?.field || ''}
-        index={pendingChange?.index || 0}
+        field={String(pendingChange?.field || '')}
+        hoardingId={pendingChange ? tableData[pendingChange.index].hoarding_id : 0}
       />
     </div>
   );
