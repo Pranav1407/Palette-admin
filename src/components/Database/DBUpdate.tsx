@@ -261,14 +261,18 @@ const DBUpdate: React.FC = () => {
       </div>
 
       <div className="border rounded-lg bg-white overflow-hidden">
-        <div className="overflow-auto max-h-[70vh]">
-          <table>
-            <thead className="bg-gray-50">
+        <div className="overflow-auto max-h-[70vh] relative">
+          <table className="w-full">
+            <thead className="bg-gray-50 sticky top-0 z-20">
               <tr>
-                {columns.map((column) => (
+                {columns.map((column, index) => (
                   <th
                     key={column.key}
-                    className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r min-w-[120px]"
+                    className={`px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r min-w-[120px] ${
+                      index === 0 
+                        ? 'sticky left-0 z-30 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' 
+                        : ''
+                    }`}
                   >
                     {column.label}
                   </th>
@@ -283,7 +287,7 @@ const DBUpdate: React.FC = () => {
                     changedRecords.has(row.hoarding_id) ? 'bg-yellow-50' : ''
                   }`}
                 >
-                  {columns.map((column) => (
+                  {columns.map((column, colIndex) => (
                     <td
                       key={`${column.key}-${index}`}
                       className={`px-4 py-3 text-sm text-gray-900 border-r min-w-[120px] ${
@@ -292,6 +296,10 @@ const DBUpdate: React.FC = () => {
                         changedRecords.has(row.hoarding_id) && 
                         changedRecords.get(row.hoarding_id)?.[column.key] !== undefined
                           ? 'bg-yellow-100 border-yellow-300'
+                          : ''
+                      } ${
+                        colIndex === 0 
+                          ? 'sticky left-0 z-10 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' 
                           : ''
                       }`}
                       onClick={() => handleCellClick(column.key, index)}
