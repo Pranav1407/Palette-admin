@@ -45,13 +45,15 @@ export function LoginPage() {
       </div>
       <div className="w-1/2 flex flex-col gap-5 items-center justify-center">
         <p className="font-thin text-5xl">Login</p>
-        <form className="flex flex-col" onSubmit={handleSubmit}>
+        <form className="flex flex-col" onSubmit={handleSubmit} autoSave="off" autoComplete="off">
           <input
             type="email"
             placeholder="Email"
             className={`w-[592px] m-2 p-3 pl-6 border border-[#d9d9d9] rounded-[20px] outline-none font-normal text-xl text-[#818181] ${error ? 'border-red-500' : ''}`}
             value={credentials.username}
             required
+            autoSave="off"
+            autoComplete="username"
             onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
           />
           <div className="relative">
@@ -61,6 +63,8 @@ export function LoginPage() {
               className={`w-[592px] m-2 p-3 pl-6 border border-[#d9d9d9] rounded-[20px] outline-none font-normal text-xl text-[#818181] ${error ? 'border-red-500' : ''}`}
               value={credentials.password}
               required
+              autoSave="off"
+              autoComplete="password"
               onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
             />
             <button

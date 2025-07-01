@@ -49,7 +49,7 @@ const Header = ({ searchQuery, setSearchQuery }: HeaderProps) => {
         <header className="bg-white px-8 py-4 flex justify-between items-center relative">
             <div className="text-5xl text-sidebar-15 w-[90%] flex justify-between items-center">
                 {getPageTitle()}
-                {location.pathname !== '/chat' && location.pathname !== '/' && (
+                {location.pathname !== '/chat' && location.pathname !== '/' && location.pathname !== '/dbupdate' && location.pathname !== '/add-admin' && location.pathname !== '/email-remainder' && (
                     <div className="flex items-center justify-center gap-2">
                         <div className="rounded-xl border border-[#D9D9D9] text-[#818181] text-lg font-normal p-3 flex items-center justify-center gap-2">
                             <Search size={26} />

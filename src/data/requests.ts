@@ -11,7 +11,9 @@ import {
     AddAdminResponse, 
     GetDBDataResponse,
     DBUpdateResponse,
-    DBUpdateRequest
+    DBUpdateRequest,
+    NewHoardingRow,
+    DeleteHoardingRequest
 } from '@/types/Types';
 
 import axios from 'axios';
@@ -145,5 +147,25 @@ export const updateDBData = async (changes: DBUpdateRequest[]): Promise<DBUpdate
     } catch (error) {
         console.error('Error backing up data:', error);
         throw error;
+    }
+}
+
+export const addDBData = async (data: NewHoardingRow) => {
+    try {
+        const response = await axiosInstance.post('/database/db_add', data);
+        return response.data;
+    } catch (error) {
+        console.error('Error adding data', error);
+        throw error
+    }
+}
+
+export const deleteDBData = async (data: DeleteHoardingRequest) => {
+    try {
+        const response = await axiosInstance.delete('/database/db_delete', { data });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding data', error);
+        throw error
     }
 }

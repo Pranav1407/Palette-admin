@@ -89,7 +89,6 @@ const AddAdmin = () =>{
               placeholder="Email"
               className="border border-gray-300 p-3 pl-6 rounded-xl w-full outline-none focus:outline-none"
             />
-
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}

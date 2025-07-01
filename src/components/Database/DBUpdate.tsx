@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getDBData, updateDBData } from '@/data/requests';
-import { GetDBDataResponse, DBHoardingData, DBUpdateRequest } from '@/types/Types';
+import { addDBData, deleteDBData, getDBData, updateDBData } from '@/data/requests';
+import { GetDBDataResponse, DBHoardingData, DBUpdateRequest, NewHoardingRow } from '@/types/Types';
 import toast from 'react-hot-toast';
+import { X, Trash2 } from "lucide-react"
+import AuthenticationModal from '../utils/AuthenticationModal';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -61,10 +63,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 const DBUpdate: React.FC = () => {
   const [tableData, setTableData] = useState<DBHoardingData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addLoading, setAddLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingCell, setEditingCell] = useState<{field: keyof DBHoardingData, index: number} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const [pendingChange, setPendingChange] = useState<{
     field: keyof DBHoardingData;
     index: number;
@@ -73,11 +80,35 @@ const DBUpdate: React.FC = () => {
   } | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [changedRecords, setChangedRecords] = useState<Map<number, Partial<DBHoardingData>>>(new Map());
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"delete" | "save" | "add" | null>(null);
+  const [latInput, setLatInput] = useState('');
+  const [longInput, setLongInput] = useState('');
+  const [newRow, setNewRow] = useState<NewHoardingRow>({
+    hoarding_id: null,
+    district: '',
+    location: '',
+    direction_route: '',
+    width: null,
+    height: null,
+    area: null,
+    type: '',
+    rate_sqft_1_months: null,
+    rate_sqft_3_months: null,
+    rate_sqft_6_months: null,
+    rate_sqft_12_months: null,
+    floor: '',
+    hoarding_code: '',
+    status: '',
+    available: '',
+    location_coordinates: latInput && longInput ? `${latInput} ${longInput}` : null,
+    notes: ''
+  });
 
   const columns: { key: keyof DBHoardingData; label: string; editable: boolean }[] = [
     { key: 'hoarding_id', label: 'Hoarding ID', editable: false },
     { key: 'district', label: 'District', editable: true },
-    { key: 'location_route', label: 'Location/Route', editable: true },
+    { key: 'location', label: 'Location/Route', editable: true },
     { key: 'direction_route', label: 'Direction/Route', editable: true },
     { key: 'width', label: 'Width', editable: true },
     { key: 'height', label: 'Height', editable: true },
@@ -98,8 +129,9 @@ const DBUpdate: React.FC = () => {
       try {
         setLoading(true);
         const response: GetDBDataResponse = await getDBData();
-        console.log("response", response);
-        setTableData(response.payload.data_list_dict);
+        if(response.message === "Data Fetch successful"){
+          setTableData(response.payload.data_list_dict);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -107,8 +139,26 @@ const DBUpdate: React.FC = () => {
       }
     }
 
-    fetchDB();
+    if(!tableData.length) {
+      fetchDB();
+    }
   }, []);
+
+  useEffect(() => {
+    // Update the location_coordinates whenever latInput or longInput changes
+    if (latInput && longInput) {
+      const coordinates = `${latInput} ${longInput}`;
+      setNewRow(prev => ({
+        ...prev,
+        location_coordinates: coordinates
+      }));
+    } else {
+      setNewRow(prev => ({
+        ...prev,
+        location_coordinates: null
+      }));
+    }
+  }, [latInput, longInput]);
 
   const handleCellClick = (field: keyof DBHoardingData, index: number) => {
     const column = columns.find(col => col.key === field);
@@ -190,10 +240,51 @@ const DBUpdate: React.FC = () => {
     setEditingCell(null);
   };
 
+  const addRow = async () => {
+    try {
+      setAddLoading(true);
+      const response = await addDBData(newRow);
+      if(response.message === "New hoarding added successfully") {
+        toast.success("Row added successfully!", {
+          position: "top-right",
+          duration: 3000,
+        });
+        setTableData((prev: any) => [...prev, { ...newRow, hoarding_id: response?.payload?.hoarding_id || Math.random() }]);
+        setShowAddModal(false);
+        setNewRow({
+          hoarding_id: null,
+          district: '',
+          location: '',
+          direction_route: '',
+          width: null,
+          height: null,
+          area: null,
+          type: '',
+          rate_sqft_1_months: null,
+          rate_sqft_3_months: null,
+          rate_sqft_6_months: null,
+          rate_sqft_12_months: null,
+          floor: '',
+          hoarding_code: '',
+          status: '',
+          available: '',
+          location_coordinates: null,
+          notes: ''
+        });
+      }
+    } catch (error) {
+      toast.error("Something went wrong, Please try again later", {
+        position: "top-right",
+        duration: 5000
+      })
+    } finally{
+      setAddLoading(false);
+    }
+  }
+
   const saveChanges = async () => {
     try {
       setSaving(true);
-    
       const apiPayload: DBUpdateRequest[] = Array.from(changedRecords.entries()).map(([hoardingId, changes]) => ({
         hoarding_id: hoardingId,
         ...changes
@@ -205,7 +296,12 @@ const DBUpdate: React.FC = () => {
           position: "top-right",
           duration: 3000
         });
-        
+        setTableData(prevData =>
+          prevData.map(row => {
+            const changes = changedRecords.get(row.hoarding_id);
+            return changes ? { ...row, ...changes } : row;
+          })
+        );
         setChangedRecords(new Map());
         setHasChanges(false);
       } else {
@@ -228,6 +324,44 @@ const DBUpdate: React.FC = () => {
     return String(value);
   };
 
+  const handleDelete = async (hoarding_id: number) => {
+    try {
+      const payload = { hoarding_id: hoarding_id };
+      await deleteDBData(payload);
+      toast.success("Row deleted successfully!", {
+        position: "top-right",
+        duration: 3000,
+      });
+      setTableData(prev => prev.filter(row => row.hoarding_id !== hoarding_id));
+    } catch (error) {
+      toast.error("Failed to delete row", {
+        position: "top-right",
+        duration: 5000,
+      });
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteTargetId(null);
+      setAuthenticated(false);
+    }
+  };
+
+  function toDMS(deg: number, isLat: boolean): string {
+    const absolute = Math.abs(deg);
+    const degrees = Math.floor(absolute);
+    const minutesNotTruncated = (absolute - degrees) * 60;
+    const minutes = Math.floor(minutesNotTruncated);
+    const seconds = Math.round((minutesNotTruncated - minutes) * 60);
+
+    const direction = isLat
+      ? deg >= 0 ? "N" : "S"
+      : deg >= 0 ? "E" : "W";
+
+    // Example: 09°58'30" N
+    return `${degrees.toString().padStart(2, "0")}°${minutes
+      .toString()
+      .padStart(2, "0")}'${seconds.toString().padStart(2, "0")}" ${direction}`;
+  }
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
@@ -236,27 +370,43 @@ const DBUpdate: React.FC = () => {
     );
   }
 
+  console.log("location coordinates:", latInput, longInput);
+
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Database Update</h1>
+      <div className="flex justify-end items-center mb-6">
         <div className="flex items-center space-x-4">
-          {hasChanges && (
-            <span className="text-sm text-gray-600">
-              {changedRecords.size} record(s) modified
-            </span>
-          )}
           <button
-            onClick={saveChanges}
-            disabled={!hasChanges || saving}
-            className={`px-4 py-2 rounded font-medium ${
-              hasChanges && !saving
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            className={`px-4 py-2 rounded font-medium bg-green-600 text-white hover:bg-green-700`}
+            onClick={() => setShowAddModal(true)}
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            Add row
           </button>
+          <div className="flex flex-col justify-center items-center">
+            <button
+              onClick={() => {
+                if (!authenticated) {
+                  setPendingAction("save");
+                  setShowAuthModal(true);
+                } else {
+                  saveChanges();
+                }
+              }}
+              disabled={!hasChanges || saving}
+              className={`px-4 py-2 rounded font-medium ${
+                hasChanges && !saving
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+            {hasChanges && (
+              <span className="text-xs text-gray-600">
+                {changedRecords.size} record(s) modified
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -277,6 +427,11 @@ const DBUpdate: React.FC = () => {
                     {column.label}
                   </th>
                 ))}
+                <th
+                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b min-w-[60px] sticky right-0 z-30 bg-gray-50"
+                >
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-center">
@@ -321,12 +476,164 @@ const DBUpdate: React.FC = () => {
                       )}
                     </td>
                   ))}
+                  <td
+                    className="px-4 py-3 text-center sticky right-0 bg-white border-l"
+                  >
+                    <button
+                      onClick={() => {
+                        setDeleteTargetId(row.hoarding_id);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete Row"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+            <div className="flex">
+              <h3 className="text-lg font-semibold mb-4">Add New Row</h3>
+              <X
+                className="ml-auto cursor-pointer text-gray-500 hover:text-gray-700"
+                onClick={() => setShowAddModal(false)}
+              />  
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (addLoading) return;
+                setShowAuthModal(true);
+                setPendingAction("add");
+              }}
+              className="space-y-3 max-h-[70vh] overflow-y-auto"
+            >
+              {(columns as { key: keyof NewHoardingRow; label: string; editable: boolean }[]).map((col) => (
+                <div key={col.key as string} className="flex flex-col">
+                  <label className="text-sm font-medium mb-1">{col.label}</label>
+                  <input
+                    type='text'
+                    value={(newRow[col.key] as any)}
+                    onChange={(e) => {
+                      const rawValue = e.target.value;
+                      setNewRow((prev) => ({
+                        ...prev,
+                        [col.key]:
+                          typeof prev[col.key] === 'number'
+                            ? Number(rawValue)
+                            : rawValue.replace(/^\s+|\s+$/g, ""), // Trim leading/trailing spaces
+                      }));
+                    }}
+                    className="border px-2 py-1 rounded outline-none"
+                    required
+                  />
+                </div>
+              ))}
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-1">{`Latitude (In decimal degrees)`}</label>
+                <input
+                  type="text"
+                  value={latInput}
+                  onChange={e => {
+                    if(e.target.value === '') {
+                      setLatInput('');
+                      return;
+                    }
+                    const newLat = e.target.value;
+                    const lat = toDMS(Number(newLat.replace(/^\s+|\s+$/g, "")), true);
+                    setLatInput(lat);
+                  }}
+                  className="border px-2 py-1 rounded outline-none"
+                  required
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-1">{`Longitude (In decimal degrees)`}</label>
+                <input
+                  type="text"
+                  value={longInput}
+                  onChange={e => {
+                    if(e.target.value === '') {
+                      setLongInput('');
+                      return;
+                    }
+                    const newLong = e.target.value;
+                    const long = toDMS(Number(newLong.replace(/^\s+|\s+$/g, "")), false);
+                    setLongInput(long);
+                  }}
+                  className="border px-2 py-1 rounded outline-none"
+                  required
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-1">Notes</label>
+                <textarea
+                  value={newRow.notes || ''}
+                  onChange={e => setNewRow(prev => ({ ...prev, notes: e.target.value === '' ? null : e.target.value}))}
+                  className="border px-2 py-1 rounded outline-none resize-none"
+                  required
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={`px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 ${addLoading && 'cursor-not-allowed opacity-50'}`}
+                  disabled={addLoading}
+                >
+                  {addLoading ? 'Adding...' : 'Add Row'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Confirm Delete</h3>
+              <X className="cursor-pointer text-gray-500 hover:text-gray-700" onClick={() => setShowDeleteConfirm(false)} />
+            </div>
+            <p className="mb-6">Are you sure you want to delete hoarding id <b>{deleteTargetId}</b>?</p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setPendingAction("delete");
+                  setShowAuthModal(true);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={showModal}
@@ -336,6 +643,27 @@ const DBUpdate: React.FC = () => {
         newValue={pendingChange?.newValue || ''}
         field={String(pendingChange?.field || '')}
         hoardingId={pendingChange ? tableData[pendingChange.index].hoarding_id : 0}
+      />
+
+      <AuthenticationModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onContinue={(_username, _password) => {
+          setAuthenticated(true);
+          setShowAuthModal(false);
+          if (pendingAction === "delete" && deleteTargetId) {
+            handleDelete(deleteTargetId);
+          }
+          if (pendingAction === "save") {
+            saveChanges();
+          }
+          if (pendingAction === "add") {
+            addRow();
+          }
+          setPendingAction(null);
+        }}
+        cancelText="Cancel"
+        continueText="Authenticate"
       />
     </div>
   );

@@ -233,3 +233,28 @@ export interface DBUpdateResponse {
   message: string;
   payload?: any;
 }
+
+export interface NewHoardingRow {
+  hoarding_id: number | null;
+  district: string;
+  location: string;
+  direction_route: string;
+  width: number | null;
+  height: number | null;
+  area: number | null;
+  type: string;
+  rate_sqft_1_months: number | null;
+  rate_sqft_3_months: number | null;
+  rate_sqft_6_months: number | null;
+  rate_sqft_12_months: number | null;
+  floor: string;
+  hoarding_code: string;
+  status: string;
+  available: string;
+  location_coordinates: string | null;
+  notes: string | null;
+};
+
+export interface DeleteHoardingRequest {
+    hoarding_id: number;
+}
