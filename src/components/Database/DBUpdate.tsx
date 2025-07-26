@@ -115,14 +115,14 @@ const DBUpdate: React.FC = () => {
     { key: 'height', label: 'Height', editable: isEditable },
     { key: 'area', label: 'Area', editable: isEditable },
     { key: 'type', label: 'Type', editable: isEditable },
-    { key: 'rate_sqft_1_months', label: 'Rate/Sqft 1M', editable: isEditable },
-    { key: 'rate_sqft_3_months', label: 'Rate/Sqft 3M', editable: isEditable },
-    { key: 'rate_sqft_6_months', label: 'Rate/Sqft 6M', editable: isEditable },
-    { key: 'rate_sqft_12_months', label: 'Rate/Sqft 12M', editable: isEditable },
+    { key: 'rate_sqft_1_months', label: 'Rate/Sqft 1M', editable: true },
+    { key: 'rate_sqft_3_months', label: 'Rate/Sqft 3M', editable: true },
+    { key: 'rate_sqft_6_months', label: 'Rate/Sqft 6M', editable: true },
+    { key: 'rate_sqft_12_months', label: 'Rate/Sqft 12M', editable: true },
     { key: 'floor', label: 'Floor', editable: isEditable },
     { key: 'hoarding_code', label: 'Hoarding Code', editable: isEditable },
     { key: 'status', label: 'Status', editable: isEditable },
-    { key: 'available', label: 'Available', editable: isEditable },
+    { key: 'available', label: 'Available', editable: true },
   ];
 
   useEffect(() => {
