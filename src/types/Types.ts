@@ -235,7 +235,6 @@ export interface DBUpdateResponse {
 }
 
 export interface NewHoardingRow {
-  hoarding_id: number | null;
   district: string;
   location: string;
   direction_route: string;

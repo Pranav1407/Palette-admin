@@ -4,6 +4,7 @@ import { GetDBDataResponse, DBHoardingData, DBUpdateRequest, NewHoardingRow } fr
 import toast from 'react-hot-toast';
 import { X, Trash2 } from "lucide-react"
 import AuthenticationModal from '../utils/AuthenticationModal';
+import { useAuthStore } from '@/stores/authStore';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -84,8 +85,9 @@ const DBUpdate: React.FC = () => {
   const [pendingAction, setPendingAction] = useState<"delete" | "save" | "add" | null>(null);
   const [latInput, setLatInput] = useState('');
   const [longInput, setLongInput] = useState('');
+  const role = useAuthStore((state) => state.role);
+  const isEditable = role === 'super_admin';
   const [newRow, setNewRow] = useState<NewHoardingRow>({
-    hoarding_id: null,
     district: '',
     location: '',
     direction_route: '',
@@ -106,22 +108,21 @@ const DBUpdate: React.FC = () => {
   });
 
   const columns: { key: keyof DBHoardingData; label: string; editable: boolean }[] = [
-    { key: 'hoarding_id', label: 'Hoarding ID', editable: false },
-    { key: 'district', label: 'District', editable: true },
-    { key: 'location', label: 'Location/Route', editable: true },
-    { key: 'direction_route', label: 'Direction/Route', editable: true },
-    { key: 'width', label: 'Width', editable: true },
-    { key: 'height', label: 'Height', editable: true },
-    { key: 'area', label: 'Area', editable: true },
-    { key: 'type', label: 'Type', editable: true },
-    { key: 'rate_sqft_1_months', label: 'Rate/Sqft 1M', editable: true },
-    { key: 'rate_sqft_3_months', label: 'Rate/Sqft 3M', editable: true },
-    { key: 'rate_sqft_6_months', label: 'Rate/Sqft 6M', editable: true },
-    { key: 'rate_sqft_12_months', label: 'Rate/Sqft 12M', editable: true },
-    { key: 'floor', label: 'Floor', editable: true },
-    { key: 'hoarding_code', label: 'Hoarding Code', editable: true },
-    { key: 'status', label: 'Status', editable: true },
-    { key: 'available', label: 'Available', editable: true },
+    { key: 'district', label: 'District', editable: isEditable },
+    { key: 'location', label: 'Location/Route', editable: isEditable },
+    { key: 'direction_route', label: 'Direction/Route', editable: isEditable },
+    { key: 'width', label: 'Width', editable: isEditable },
+    { key: 'height', label: 'Height', editable: isEditable },
+    { key: 'area', label: 'Area', editable: isEditable },
+    { key: 'type', label: 'Type', editable: isEditable },
+    { key: 'rate_sqft_1_months', label: 'Rate/Sqft 1M', editable: isEditable },
+    { key: 'rate_sqft_3_months', label: 'Rate/Sqft 3M', editable: isEditable },
+    { key: 'rate_sqft_6_months', label: 'Rate/Sqft 6M', editable: isEditable },
+    { key: 'rate_sqft_12_months', label: 'Rate/Sqft 12M', editable: isEditable },
+    { key: 'floor', label: 'Floor', editable: isEditable },
+    { key: 'hoarding_code', label: 'Hoarding Code', editable: isEditable },
+    { key: 'status', label: 'Status', editable: isEditable },
+    { key: 'available', label: 'Available', editable: isEditable },
   ];
 
   useEffect(() => {
@@ -252,7 +253,6 @@ const DBUpdate: React.FC = () => {
         setTableData((prev: any) => [...prev, { ...newRow, hoarding_id: response?.payload?.hoarding_id || Math.random() }]);
         setShowAddModal(false);
         setNewRow({
-          hoarding_id: null,
           district: '',
           location: '',
           direction_route: '',
@@ -362,6 +362,13 @@ const DBUpdate: React.FC = () => {
       .padStart(2, "0")}'${seconds.toString().padStart(2, "0")}" ${direction}`;
   }
 
+  const parseCoordinate = (input: string): number | null => {
+    const cleaned = input.replace(/[°'"NSEW\s]/g, '');
+    const num = Number(cleaned);
+    return isNaN(num) ? null : num;
+  };
+
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
@@ -370,19 +377,17 @@ const DBUpdate: React.FC = () => {
     );
   }
 
-  console.log("location coordinates:", latInput, longInput);
-
   return (
     <div className="p-6">
       <div className="flex justify-end items-center mb-6">
         <div className="flex items-center space-x-4">
           <button
-            className={`px-4 py-2 rounded font-medium bg-green-600 text-white hover:bg-green-700`}
+            className={`px-4 py-2 rounded font-medium bg-green-600 text-white hover:bg-green-700 ${!isEditable && 'hidden'}`}
             onClick={() => setShowAddModal(true)}
           >
             Add row
           </button>
-          <div className="flex flex-col justify-center items-center">
+          <div className={`flex flex-col justify-center items-center ${!isEditable && 'hidden'}`}>
             <button
               onClick={() => {
                 if (!authenticated) {
@@ -427,11 +432,11 @@ const DBUpdate: React.FC = () => {
                     {column.label}
                   </th>
                 ))}
-                <th
+                {isEditable && <th
                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b min-w-[60px] sticky right-0 z-30 bg-gray-50"
                 >
                   Action
-                </th>
+                </th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-center">
@@ -476,7 +481,7 @@ const DBUpdate: React.FC = () => {
                       )}
                     </td>
                   ))}
-                  <td
+                  {isEditable && <td
                     className="px-4 py-3 text-center sticky right-0 bg-white border-l"
                   >
                     <button
@@ -489,7 +494,7 @@ const DBUpdate: React.FC = () => {
                     >
                       <Trash2 size={18} />
                     </button>
-                  </td>
+                  </td>}
                 </tr>
               ))}
             </tbody>
@@ -548,8 +553,11 @@ const DBUpdate: React.FC = () => {
                       return;
                     }
                     const newLat = e.target.value;
-                    const lat = toDMS(Number(newLat.replace(/^\s+|\s+$/g, "")), true);
-                    setLatInput(lat);
+                    const numericValue = parseCoordinate(newLat);
+                    if (numericValue !== null) {
+                      const lat = toDMS(Number(numericValue), true);
+                      setLatInput(lat);
+                    }
                   }}
                   className="border px-2 py-1 rounded outline-none"
                   required
@@ -566,8 +574,11 @@ const DBUpdate: React.FC = () => {
                       return;
                     }
                     const newLong = e.target.value;
-                    const long = toDMS(Number(newLong.replace(/^\s+|\s+$/g, "")), false);
-                    setLongInput(long);
+                    const numericValue = parseCoordinate(newLong);
+                    if (numericValue !== null) {
+                      const long = toDMS(Number(numericValue), false);
+                      setLongInput(long);
+                    }
                   }}
                   className="border px-2 py-1 rounded outline-none"
                   required
